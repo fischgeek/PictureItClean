@@ -4,7 +4,7 @@ services:
     ports:
       - "4000:4000"
     volumes:
-      - ./data:/data
+      - ${DATA_PATH_ON_HOST:-./data}:/data
     environment:
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
     restart: unless-stopped

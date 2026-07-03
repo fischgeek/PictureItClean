@@ -64,15 +64,20 @@ docker compose up -d --build
 ```
 
 This builds a single image that serves the built React app and the API from one Node process
-on port 4000, backed by a SQLite file and a `photos/` folder under the `./data` volume. Set a
-real `JWT_SECRET` in a `.env` file before exposing this beyond your local network:
+on port 4000, backed by a SQLite file and a `photos/` folder. By default that data lives under
+`./data` next to the compose file, but on a NAS/JBOD host you'll usually want it on bulk
+storage instead — set `DATA_PATH_ON_HOST` to an absolute path on that storage. Set a real
+`JWT_SECRET` too before exposing this beyond your local network. Either put both in a `.env`
+file next to `docker-compose.yml`, or set them as environment variables on the stack if you're
+deploying via Portainer:
 
 ```
 JWT_SECRET=some-long-random-string
+DATA_PATH_ON_HOST=/mnt/storage01/picture-it-clean
 ```
 
 All your data (buildings, areas, spaces, checklists, photos, verification history) lives under
-`./data` — back that folder up and you have the whole app.
+that path — back it up and you have the whole app's state.
 
 ## Architecture: why a repository layer
 

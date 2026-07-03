@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
+import { EditableTitle } from "../components/EditableTitle";
 import { Layout } from "../components/Layout";
 import { ShareModal } from "../components/ShareModal";
 
@@ -28,13 +29,22 @@ export function BuildingPage() {
     onSuccess: () => navigate("/"),
   });
 
+  const renameBuilding = useMutation({
+    mutationFn: (newName: string) => api.updateBuilding(buildingId!, newName),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["building", buildingId] }),
+  });
+
   return (
     <Layout>
       <Link to="/locations" className="text-sm text-brand-600 dark:text-brand-400 hover:underline">
         ← All locations
       </Link>
       <div className="flex items-center justify-between mt-2 mb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{building?.name || "…"}</h1>
+        {building ? (
+          <EditableTitle value={building.name} onSave={(name) => renameBuilding.mutate(name)} />
+        ) : (
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">…</h1>
+        )}
         <div className="flex gap-2">
           <button className="btn-secondary text-sm" onClick={() => setShowShare(true)}>
             Share

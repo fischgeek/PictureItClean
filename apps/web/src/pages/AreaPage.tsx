@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
+import { EditableTitle } from "../components/EditableTitle";
 import { Layout } from "../components/Layout";
 import { ShareModal } from "../components/ShareModal";
 
@@ -28,13 +29,22 @@ export function AreaPage() {
     onSuccess: () => navigate(-1 as any),
   });
 
+  const renameArea = useMutation({
+    mutationFn: (newName: string) => api.updateArea(areaId!, newName),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["area", areaId] }),
+  });
+
   return (
     <Layout>
       <button className="text-sm text-brand-600 dark:text-brand-400 hover:underline" onClick={() => navigate(-1)}>
         ← Back
       </button>
       <div className="flex items-center justify-between mt-2 mb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{area?.name || "…"}</h1>
+        {area ? (
+          <EditableTitle value={area.name} onSave={(name) => renameArea.mutate(name)} />
+        ) : (
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">…</h1>
+        )}
         <div className="flex gap-2">
           <button className="btn-secondary text-sm" onClick={() => setShowShare(true)}>
             Share

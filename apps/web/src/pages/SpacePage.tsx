@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api/client";
+import { EditableTitle } from "../components/EditableTitle";
 import { Layout } from "../components/Layout";
 import { ShareModal } from "../components/ShareModal";
 
@@ -48,6 +49,11 @@ export function SpacePage() {
     onSuccess: invalidateSpace,
   });
 
+  const renameSpace = useMutation({
+    mutationFn: (name: string) => api.updateSpace(spaceId!, { name }),
+    onSuccess: invalidateSpace,
+  });
+
   const deleteSpace = useMutation({
     mutationFn: () => api.deleteSpace(spaceId!),
     onSuccess: () => navigate(-1 as any),
@@ -89,7 +95,7 @@ export function SpacePage() {
       </button>
 
       <div className="flex items-center justify-between mt-2 mb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{space.name}</h1>
+        <EditableTitle value={space.name} onSave={(name) => renameSpace.mutate(name)} />
         <div className="flex gap-2">
           <button className="btn-secondary text-sm" onClick={() => setShowShare(true)}>
             Share

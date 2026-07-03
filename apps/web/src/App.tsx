@@ -1,6 +1,8 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { RequireAdmin } from "./components/RequireAdmin";
 import { RequireAuth } from "./components/RequireAuth";
+import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { AreaPage } from "./pages/AreaPage";
 import { BuildingPage } from "./pages/BuildingPage";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -49,6 +51,16 @@ export default function App() {
         element={
           <RequireAuth>
             <InviteAcceptPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminUsersPage />
+            </RequireAdmin>
           </RequireAuth>
         }
       />

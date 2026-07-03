@@ -1,7 +1,10 @@
+export type UserRole = "user" | "admin";
+
 export interface PublicUser {
   id: string;
   username: string;
   displayName: string;
+  role: UserRole;
 }
 
 export interface Building {
@@ -149,6 +152,15 @@ export const api = {
 
   photoUrl: (photoId: string) => `/api/photos/${photoId}/file`,
   thumbnailUrl: (photoId: string) => `/api/photos/${photoId}/thumbnail`,
+
+  listUsers: () => request<PublicUser[]>("/admin/users"),
+  createUser: (username: string, password: string, displayName: string, role: UserRole) =>
+    request<PublicUser>("/admin/users", { method: "POST", body: JSON.stringify({ username, password, displayName, role }) }),
+  updateUserRole: (id: string, role: UserRole) =>
+    request<PublicUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify({ role }) }),
+  resetUserPassword: (id: string, password: string) =>
+    request<PublicUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify({ password }) }),
+  deleteUser: (id: string) => request<void>(`/admin/users/${id}`, { method: "DELETE" }),
 };
 
 export { ApiError };

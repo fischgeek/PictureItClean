@@ -2,11 +2,15 @@ export type Role = "owner" | "editor" | "viewer";
 
 export type ResourceType = "building" | "area" | "space";
 
+// System-wide account role, distinct from the per-resource Role (owner/editor/viewer) above.
+export type UserRole = "user" | "admin";
+
 export interface User {
   id: string;
   username: string;
   passwordHash: string;
   displayName: string;
+  role: UserRole;
   createdAt: string;
 }
 
@@ -14,6 +18,7 @@ export interface PublicUser {
   id: string;
   username: string;
   displayName: string;
+  role: UserRole;
 }
 
 export interface Building {

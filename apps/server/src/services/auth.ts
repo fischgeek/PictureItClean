@@ -28,5 +28,5 @@ export function verifyToken(token: string): string | null {
 }
 
 export function toPublicUser(user: User): PublicUser {
-  return { id: user.id, username: user.username, displayName: user.displayName };
+  return { id: user.id, username: user.username, displayName: user.displayName, role: user.role };
 }

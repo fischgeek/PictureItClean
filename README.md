@@ -36,13 +36,17 @@ API). Open http://localhost:5173.
 
 ## Creating user accounts
 
-There's no sign-up page. The admin creates each user with a CLI script:
+There's no sign-up page. Accounts are either created by an existing admin from the **Users**
+page in the app (visible only to admins), or — to bootstrap the very first account — with a CLI
+script:
 
 ```bash
-npm run create-user --workspace apps/server -- <username> <password> [display name]
+npm run create-user --workspace apps/server -- <username> <password> [display name] [--admin]
 ```
 
-For example:
+The very first user ever created (or the first one after a fresh install) is automatically made
+an admin, so you don't need `--admin` for that one. Use it later to create additional admins
+from the CLI if needed:
 
 ```bash
 npm run create-user --workspace apps/server -- jamie secret123 "Jamie Fischer"
@@ -54,8 +58,10 @@ In Docker, run the same script inside the running container:
 docker compose exec app node apps/server/dist/cli/createUser.js jamie secret123 "Jamie Fischer"
 ```
 
-Once an account exists, that user can log in and be invited into buildings/areas/spaces like
-anyone else.
+Existing databases created before roles existed are migrated automatically on startup, and the
+earliest-created account is promoted to admin so there's always at least one. Once an account
+exists, that user can log in and be invited into buildings/areas/spaces like anyone else. There
+must always be at least one admin — the app blocks removing or demoting the last one.
 
 ## Self-hosting with Docker
 

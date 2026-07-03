@@ -9,13 +9,19 @@ import {
   Role,
   Space,
   User,
+  UserRole,
   VerificationEvent,
 } from "../domain/types";
 
 export interface UserRepository {
-  create(input: { username: string; passwordHash: string; displayName: string }): User;
+  create(input: { username: string; passwordHash: string; displayName: string; role?: UserRole }): User;
   findByUsername(username: string): User | null;
   findById(id: string): User | null;
+  listAll(): User[];
+  updateRole(id: string, role: UserRole): User;
+  updatePassword(id: string, passwordHash: string): User;
+  delete(id: string): void;
+  countAdmins(): number;
 }
 
 export interface BuildingRepository {

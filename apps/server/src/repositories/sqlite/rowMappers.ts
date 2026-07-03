@@ -5,6 +5,7 @@ export const mapUser = (row: any): User => ({
   username: row.username,
   passwordHash: row.password_hash,
   displayName: row.display_name,
+  role: row.role,
   createdAt: row.created_at,
 });
 

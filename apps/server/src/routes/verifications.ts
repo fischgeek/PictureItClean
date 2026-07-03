@@ -2,6 +2,7 @@ import { Router } from "express";
 import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { hasRole } from "../services/accessControl";
+import { toPublicUser } from "../services/auth";
 import { todayIso } from "../services/stats";
 
 export const verificationsRouter = Router();
@@ -13,7 +14,10 @@ verificationsRouter.get("/spaces/:spaceId/verifications", (req, res) => {
     return;
   }
   const events = repos.verificationEvents.listBySpace(req.params.spaceId);
-  const withUsers = events.map((e) => ({ ...e, user: repos.users.findById(e.userId) }));
+  const withUsers = events.map((e) => {
+    const user = repos.users.findById(e.userId);
+    return { ...e, user: user ? toPublicUser(user) : null };
+  });
   res.json(withUsers);
 });
 

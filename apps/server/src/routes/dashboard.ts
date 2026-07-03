@@ -16,17 +16,19 @@ import {
 export const dashboardRouter = Router();
 dashboardRouter.use(requireAuth);
 
-dashboardRouter.get("/dashboard", (req, res) => {
-  const userId = req.user!.id;
-  const buildings = repos.buildings.listForUser(userId);
-  const rollups = buildFullRollup(buildings);
-  const allSpaceIds = flattenSpaces(rollups).map((s) => s.spaceId);
+/** Runs a dashboard section in isolation: a bug or edge case in one chart/section should
+ * degrade that section, not blank the whole page. Logs the real error so it's visible in
+ * `docker logs`/Portainer even though the client only sees the fallback value. */
+function safe<T>(label: string, fn: () => T, fallback: T): T {
+  try {
+    return fn();
+  } catch (err) {
+    console.error(`[dashboard] ${label} failed:`, err);
+    return fallback;
+  }
+}
 
-  const overdueSpaces = overdueList(rollups, 10);
-  const trend = verificationTrend(allSpaceIds, 14);
-  const activity = activityByUser(allSpaceIds);
-  const complianceByBuilding = rollups.map((b) => ({ buildingId: b.id, name: b.name, percent: b.percent }));
-
+function computeAssignment(userId: string) {
   const assignedSpaceIds = resolveAssignedSpaceIds(userId);
   const hasAssignmentPool = assignedSpaceIds.length > 0;
   const today = todayIso();
@@ -57,6 +59,25 @@ dashboardRouter.get("/dashboard", (req, res) => {
       };
     }
   }
+
+  return { myAssignment, hasAssignmentPool };
+}
+
+dashboardRouter.get("/dashboard", (req, res) => {
+  const userId = req.user!.id;
+
+  const rollups = safe("buildFullRollup", () => buildFullRollup(repos.buildings.listForUser(userId)), []);
+  const allSpaceIds = flattenSpaces(rollups).map((s) => s.spaceId);
+
+  const overdueSpaces = safe("overdueList", () => overdueList(rollups, 10), []);
+  const trend = safe("verificationTrend", () => verificationTrend(allSpaceIds, 14), []);
+  const activity = safe("activityByUser", () => activityByUser(allSpaceIds), []);
+  const complianceByBuilding = rollups.map((b) => ({ buildingId: b.id, name: b.name, percent: b.percent }));
+  const { myAssignment, hasAssignmentPool } = safe(
+    "computeAssignment",
+    () => computeAssignment(userId),
+    { myAssignment: null, hasAssignmentPool: false }
+  );
 
   res.json({
     myAssignment,

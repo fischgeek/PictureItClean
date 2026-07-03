@@ -69,7 +69,7 @@ export function SpacePage() {
   if (isLoading || !space) {
     return (
       <Layout>
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-slate-500 dark:text-slate-400">Loading…</p>
       </Layout>
     );
   }
@@ -79,32 +79,32 @@ export function SpacePage() {
 
   return (
     <Layout>
-      <button className="text-sm text-brand-700 hover:underline" onClick={() => navigate(-1)}>
+      <button className="text-sm text-brand-600 dark:text-brand-400 hover:underline" onClick={() => navigate(-1)}>
         ← Back
       </button>
 
       <div className="flex items-center justify-between mt-2 mb-4">
-        <h1 className="text-2xl font-semibold">{space.name}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{space.name}</h1>
         <div className="flex gap-2">
-          <button className="rounded border px-3 py-1 text-sm hover:bg-gray-100" onClick={() => setShowShare(true)}>
+          <button className="btn-secondary text-sm" onClick={() => setShowShare(true)}>
             Share
           </button>
-          <button className="rounded border px-3 py-1 text-sm hover:bg-gray-100" onClick={() => setEditMode((v) => !v)}>
+          <button className="btn-secondary text-sm" onClick={() => setEditMode((v) => !v)}>
             {editMode ? "Done editing" : "Edit"}
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden mb-4">
-        <div className="aspect-video bg-gray-100 flex items-center justify-center">
+      <div className="card-glass overflow-hidden mb-4">
+        <div className="aspect-video bg-slate-100/60 dark:bg-white/5 flex items-center justify-center">
           {space.currentPhoto ? (
             <img src={api.photoUrl(space.currentPhoto.id)} alt={space.name} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-gray-400">No reference photo yet</span>
+            <span className="text-slate-400 dark:text-slate-500">No reference photo yet</span>
           )}
         </div>
         {editMode && (
-          <div className="p-3 border-t">
+          <div className="p-3 border-t border-white/40 dark:border-white/10">
             <input
               ref={fileInput}
               type="file"
@@ -115,17 +115,17 @@ export function SpacePage() {
                 if (file) uploadPhoto.mutate(file);
               }}
             />
-            <button className="text-sm text-brand-700 hover:underline" onClick={() => fileInput.current?.click()}>
+            <button className="text-sm text-brand-600 dark:text-brand-400 hover:underline" onClick={() => fileInput.current?.click()}>
               {space.currentPhoto ? "Replace photo" : "Upload photo"}
             </button>
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
+      <div className="card-glass p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-medium">Checklist</h2>
-          <span className="text-sm text-gray-500">~{totalMinutes} min total</span>
+          <h2 className="text-lg font-medium text-slate-700 dark:text-slate-200">Checklist</h2>
+          <span className="text-sm text-slate-500 dark:text-slate-400">~{totalMinutes} min total</span>
         </div>
 
         <ul className="space-y-2 mb-3">
@@ -133,15 +133,15 @@ export function SpacePage() {
             <li key={item.id} className="flex items-center gap-3">
               <input
                 type="checkbox"
-                className="w-5 h-5"
+                className="w-5 h-5 rounded accent-brand-500"
                 checked={!!checked[item.id]}
                 onChange={(e) => setChecked((c) => ({ ...c, [item.id]: e.target.checked }))}
               />
-              <span className="flex-1">{item.text}</span>
-              <span className="text-sm text-gray-500">{item.estimatedMinutes} min</span>
+              <span className="flex-1 text-slate-800 dark:text-slate-100">{item.text}</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{item.estimatedMinutes} min</span>
               {editMode && (
                 <button
-                  className="text-sm text-red-600 hover:underline"
+                  className="text-sm text-red-600 dark:text-red-400 hover:underline"
                   onClick={() => deleteItem.mutate(item.id)}
                 >
                   Remove
@@ -149,7 +149,9 @@ export function SpacePage() {
               )}
             </li>
           ))}
-          {space.checklistItems.length === 0 && <p className="text-gray-500 text-sm">No checklist items yet.</p>}
+          {space.checklistItems.length === 0 && (
+            <p className="text-slate-500 dark:text-slate-400 text-sm">No checklist items yet.</p>
+          )}
         </ul>
 
         {editMode && (
@@ -161,7 +163,7 @@ export function SpacePage() {
             }}
           >
             <input
-              className="flex-1 border rounded px-3 py-2 text-sm"
+              className="input-glass flex-1 text-sm"
               placeholder="New checklist item"
               value={newItemText}
               onChange={(e) => setNewItemText(e.target.value)}
@@ -169,16 +171,16 @@ export function SpacePage() {
             <input
               type="number"
               min={1}
-              className="w-20 border rounded px-2 py-2 text-sm"
+              className="input-glass w-20 text-sm"
               value={newItemMinutes}
               onChange={(e) => setNewItemMinutes(Number(e.target.value))}
             />
-            <button className="rounded bg-brand-600 text-white px-3 py-2 text-sm hover:bg-brand-700">Add</button>
+            <button className="btn-primary text-sm">Add</button>
           </form>
         )}
 
         <textarea
-          className="w-full border rounded px-3 py-2 text-sm mb-2"
+          className="input-glass mb-2"
           placeholder="Optional note about this verification"
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -186,23 +188,23 @@ export function SpacePage() {
         />
         <button
           disabled={verify.isPending || space.checklistItems.length === 0}
-          className="w-full rounded bg-brand-600 text-white py-2 hover:bg-brand-700 disabled:opacity-50"
+          className="btn-primary w-full"
           onClick={() => verify.mutate()}
         >
           {allChecked ? "Mark Verified ✓" : "Submit Verification"}
         </button>
-        {justVerified && <p className="text-brand-700 text-sm mt-2">Verification recorded. Thank you!</p>}
+        {justVerified && <p className="text-brand-600 dark:text-brand-400 text-sm mt-2">Verification recorded. Thank you!</p>}
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border p-4 mb-4">
-        <h2 className="text-lg font-medium mb-2">Verification history</h2>
-        {history?.length === 0 && <p className="text-gray-500 text-sm">No verifications yet.</p>}
+      <div className="card-glass p-4 mb-4">
+        <h2 className="text-lg font-medium mb-2 text-slate-700 dark:text-slate-200">Verification history</h2>
+        {history?.length === 0 && <p className="text-slate-500 dark:text-slate-400 text-sm">No verifications yet.</p>}
         <ul className="space-y-2">
           {history?.map((h) => (
-            <li key={h.id} className="text-sm border-b pb-2 last:border-b-0">
-              <span className="font-medium">{h.user?.displayName || "Someone"}</span>{" "}
-              <span className="text-gray-500">{new Date(h.completedAt).toLocaleString()}</span>
-              {h.note && <p className="text-gray-600 italic">“{h.note}”</p>}
+            <li key={h.id} className="text-sm border-b border-white/40 dark:border-white/10 pb-2 last:border-b-0">
+              <span className="font-medium text-slate-800 dark:text-slate-100">{h.user?.displayName || "Someone"}</span>{" "}
+              <span className="text-slate-500 dark:text-slate-400">{new Date(h.completedAt).toLocaleString()}</span>
+              {h.note && <p className="text-slate-600 dark:text-slate-300 italic">“{h.note}”</p>}
             </li>
           ))}
         </ul>
@@ -210,7 +212,7 @@ export function SpacePage() {
 
       {editMode && (
         <button
-          className="text-sm text-red-600 hover:underline"
+          className="text-sm text-red-600 dark:text-red-400 hover:underline"
           onClick={() => {
             if (confirm(`Delete "${space.name}"?`)) deleteSpace.mutate();
           }}

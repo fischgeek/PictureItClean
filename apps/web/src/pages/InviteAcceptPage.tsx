@@ -21,23 +21,19 @@ export function InviteAcceptPage() {
 
   return (
     <Layout>
-      <div className="bg-white rounded-lg shadow-sm border p-6 max-w-md mx-auto text-center">
-        <h1 className="text-xl font-semibold mb-2">You've been invited!</h1>
-        {isLoading && <p className="text-gray-500">Loading invite…</p>}
-        {error && <p className="text-red-600">This invite link is invalid or expired.</p>}
+      <div className="card-glass p-6 max-w-md mx-auto text-center">
+        <h1 className="text-xl font-semibold mb-2 text-slate-800 dark:text-slate-100">You've been invited!</h1>
+        {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading invite…</p>}
+        {error && <p className="text-red-600 dark:text-red-400">This invite link is invalid or expired.</p>}
         {invite && (
           <>
-            <p className="text-gray-600 mb-4">
+            <p className="text-slate-600 dark:text-slate-300 mb-4">
               Join <strong>{invite.resourceName}</strong> ({invite.resourceType}) as <strong>{invite.role}</strong>.
             </p>
-            <button
-              disabled={accept.isPending}
-              className="rounded bg-brand-600 text-white px-4 py-2 hover:bg-brand-700 disabled:opacity-50"
-              onClick={() => accept.mutate()}
-            >
+            <button disabled={accept.isPending} className="btn-primary" onClick={() => accept.mutate()}>
               Accept invite
             </button>
-            {accept.isError && <p className="text-red-600 text-sm mt-2">Failed to accept invite.</p>}
+            {accept.isError && <p className="text-red-600 dark:text-red-400 text-sm mt-2">Failed to accept invite.</p>}
           </>
         )}
       </div>

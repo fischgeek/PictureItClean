@@ -19,7 +19,9 @@ export function DashboardPage() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-semibold mb-4">Your Buildings & Houses</h1>
+      <h1 className="text-2xl font-semibold tracking-tight mb-4 text-slate-800 dark:text-slate-100">
+        Your Buildings &amp; Houses
+      </h1>
 
       <form
         className="flex gap-2 mb-6"
@@ -29,24 +31,24 @@ export function DashboardPage() {
         }}
       >
         <input
-          className="flex-1 border rounded px-3 py-2"
+          className="input-glass flex-1"
           placeholder="Add a building or house (e.g. Home, Church)"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button className="rounded bg-brand-600 text-white px-4 py-2 hover:bg-brand-700">Add</button>
+        <button className="btn-primary">Add</button>
       </form>
 
-      {isLoading && <p className="text-gray-500">Loading…</p>}
+      {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
       {buildings?.length === 0 && (
-        <p className="text-gray-500">No buildings yet. Add one above, or accept a share invite link.</p>
+        <p className="text-slate-500 dark:text-slate-400">No buildings yet. Add one above, or accept a share invite link.</p>
       )}
       <ul className="space-y-2">
         {buildings?.map((b) => (
           <li key={b.id}>
             <Link
               to={`/buildings/${b.id}`}
-              className="block bg-white rounded-lg shadow-sm border px-4 py-3 hover:border-brand-500"
+              className="card-glass flex items-center px-4 py-3 hover:bg-white/80 dark:hover:bg-white/10 transition-colors text-slate-800 dark:text-slate-100"
             >
               {b.name}
             </Link>

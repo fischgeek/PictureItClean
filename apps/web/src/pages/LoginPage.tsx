@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { Logo } from "../components/Logo";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -26,32 +28,30 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={submit} className="bg-white rounded-lg shadow p-8 w-full max-w-sm">
-        <h1 className="text-xl font-semibold mb-1">🧹 Picture It Clean</h1>
-        <p className="text-sm text-gray-500 mb-6">Log in to your account</p>
-        <label className="block text-sm font-medium mb-1">Username</label>
-        <input
-          className="w-full border rounded px-3 py-2 mb-3"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          autoFocus
-        />
-        <label className="block text-sm font-medium mb-1">Password</label>
+    <div className="min-h-screen flex items-center justify-center px-4 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <form onSubmit={submit} className="card-glass p-8 w-full max-w-sm">
+        <div className="flex items-center gap-2 mb-1">
+          <Logo size={28} />
+          <h1 className="text-xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">Picture It Clean</h1>
+        </div>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Log in to your account</p>
+        <label className="label-glass">Username</label>
+        <input className="input-glass mb-3" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
+        <label className="label-glass">Password</label>
         <input
           type="password"
-          className="w-full border rounded px-3 py-2 mb-4"
+          className="input-glass mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
-        <button
-          disabled={busy}
-          className="w-full rounded bg-brand-600 text-white py-2 hover:bg-brand-700 disabled:opacity-50"
-        >
+        {error && <p className="text-red-600 dark:text-red-400 text-sm mb-3">{error}</p>}
+        <button disabled={busy} className="btn-primary w-full">
           Log in
         </button>
-        <p className="text-sm text-gray-500 mt-4">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
           No account yet? Ask your admin to create one for you.
         </p>
       </form>

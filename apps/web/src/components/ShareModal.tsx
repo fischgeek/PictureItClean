@@ -27,29 +27,32 @@ export function ShareModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-lg p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-lg font-semibold mb-4">Share this {resourceType}</h2>
-        <label className="block text-sm font-medium mb-1">Access level</label>
+    <div
+      className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+      onClick={onClose}
+    >
+      <div className="card-glass p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-100">Share this {resourceType}</h2>
+        <label className="label-glass">Access level</label>
         <select
-          className="w-full border rounded px-3 py-2 mb-4"
+          className="input-glass mb-4"
           value={role}
           onChange={(e) => setRole(e.target.value as "viewer" | "editor")}
         >
           <option value="viewer">Viewer (can verify checklists)</option>
           <option value="editor">Editor (can also edit content)</option>
         </select>
-        <button className="w-full rounded bg-brand-600 text-white py-2 hover:bg-brand-700" onClick={generate}>
+        <button className="btn-primary w-full" onClick={generate}>
           Generate invite link
         </button>
-        {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+        {error && <p className="text-red-600 dark:text-red-400 text-sm mt-2">{error}</p>}
         {link && (
           <div className="mt-4">
-            <p className="text-sm text-gray-600 mb-1">Share this link:</p>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Share this link:</p>
             <div className="flex gap-2">
-              <input readOnly className="flex-1 border rounded px-2 py-1 text-sm" value={link} />
+              <input readOnly className="input-glass flex-1 text-sm" value={link} />
               <button
-                className="rounded bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300"
+                className="btn-secondary text-sm"
                 onClick={() => {
                   navigator.clipboard.writeText(link);
                   setCopied(true);
@@ -60,7 +63,7 @@ export function ShareModal({
             </div>
           </div>
         )}
-        <button className="mt-4 text-sm text-gray-500 hover:underline" onClick={onClose}>
+        <button className="mt-4 text-sm text-slate-500 dark:text-slate-400 hover:underline" onClick={onClose}>
           Close
         </button>
       </div>

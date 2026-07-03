@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -8,25 +10,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-brand-700 text-white">
+      <header className="sticky top-0 z-40 bg-white/60 dark:bg-slate-900/50 backdrop-blur-xl border-b border-white/50 dark:border-white/10">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <Link to="/" className="text-lg font-semibold">
-            🧹 Picture It Clean
+          <Link to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">
+            <Logo size={30} />
+            Picture It Clean
           </Link>
-          {user && (
-            <div className="flex items-center gap-3 text-sm">
-              <span>{user.displayName}</span>
-              <button
-                className="rounded bg-brand-600 px-3 py-1 hover:bg-brand-500"
-                onClick={async () => {
-                  await logout();
-                  navigate("/login");
-                }}
-              >
-                Log out
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            {user && (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="hidden sm:inline text-slate-600 dark:text-slate-300">{user.displayName}</span>
+                <button
+                  className="btn-ghost"
+                  onClick={async () => {
+                    await logout();
+                    navigate("/login");
+                  }}
+                >
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>

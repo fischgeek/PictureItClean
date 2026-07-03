@@ -30,17 +30,17 @@ export function BuildingPage() {
 
   return (
     <Layout>
-      <Link to="/" className="text-sm text-brand-700 hover:underline">
+      <Link to="/" className="text-sm text-brand-600 dark:text-brand-400 hover:underline">
         ← All buildings
       </Link>
       <div className="flex items-center justify-between mt-2 mb-4">
-        <h1 className="text-2xl font-semibold">{building?.name || "…"}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{building?.name || "…"}</h1>
         <div className="flex gap-2">
-          <button className="rounded border px-3 py-1 text-sm hover:bg-gray-100" onClick={() => setShowShare(true)}>
+          <button className="btn-secondary text-sm" onClick={() => setShowShare(true)}>
             Share
           </button>
           <button
-            className="rounded border border-red-300 text-red-600 px-3 py-1 text-sm hover:bg-red-50"
+            className="btn-danger text-sm"
             onClick={() => {
               if (confirm(`Delete "${building?.name}" and everything in it?`)) deleteBuilding.mutate();
             }}
@@ -50,7 +50,7 @@ export function BuildingPage() {
         </div>
       </div>
 
-      <h2 className="text-lg font-medium mb-2">Areas</h2>
+      <h2 className="text-lg font-medium mb-2 text-slate-700 dark:text-slate-200">Areas</h2>
       <form
         className="flex gap-2 mb-4"
         onSubmit={(e) => {
@@ -59,20 +59,23 @@ export function BuildingPage() {
         }}
       >
         <input
-          className="flex-1 border rounded px-3 py-2"
+          className="input-glass flex-1"
           placeholder="Add an area (e.g. Kitchen, Sanctuary)"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button className="rounded bg-brand-600 text-white px-4 py-2 hover:bg-brand-700">Add</button>
+        <button className="btn-primary">Add</button>
       </form>
 
-      {isLoading && <p className="text-gray-500">Loading…</p>}
-      {areas?.length === 0 && <p className="text-gray-500">No areas yet.</p>}
+      {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
+      {areas?.length === 0 && <p className="text-slate-500 dark:text-slate-400">No areas yet.</p>}
       <ul className="space-y-2">
         {areas?.map((a) => (
           <li key={a.id}>
-            <Link to={`/areas/${a.id}`} className="block bg-white rounded-lg shadow-sm border px-4 py-3 hover:border-brand-500">
+            <Link
+              to={`/areas/${a.id}`}
+              className="card-glass flex items-center px-4 py-3 hover:bg-white/80 dark:hover:bg-white/10 transition-colors text-slate-800 dark:text-slate-100"
+            >
               {a.name}
             </Link>
           </li>

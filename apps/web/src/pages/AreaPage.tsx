@@ -30,17 +30,17 @@ export function AreaPage() {
 
   return (
     <Layout>
-      <button className="text-sm text-brand-700 hover:underline" onClick={() => navigate(-1)}>
+      <button className="text-sm text-brand-600 dark:text-brand-400 hover:underline" onClick={() => navigate(-1)}>
         ← Back
       </button>
       <div className="flex items-center justify-between mt-2 mb-4">
-        <h1 className="text-2xl font-semibold">{area?.name || "…"}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{area?.name || "…"}</h1>
         <div className="flex gap-2">
-          <button className="rounded border px-3 py-1 text-sm hover:bg-gray-100" onClick={() => setShowShare(true)}>
+          <button className="btn-secondary text-sm" onClick={() => setShowShare(true)}>
             Share
           </button>
           <button
-            className="rounded border border-red-300 text-red-600 px-3 py-1 text-sm hover:bg-red-50"
+            className="btn-danger text-sm"
             onClick={() => {
               if (confirm(`Delete "${area?.name}" and everything in it?`)) deleteArea.mutate();
             }}
@@ -50,7 +50,7 @@ export function AreaPage() {
         </div>
       </div>
 
-      <h2 className="text-lg font-medium mb-2">Spaces</h2>
+      <h2 className="text-lg font-medium mb-2 text-slate-700 dark:text-slate-200">Spaces</h2>
       <form
         className="flex gap-2 mb-4"
         onSubmit={(e) => {
@@ -59,28 +59,31 @@ export function AreaPage() {
         }}
       >
         <input
-          className="flex-1 border rounded px-3 py-2"
+          className="input-glass flex-1"
           placeholder="Add a space (e.g. Counter, Front Pew Row)"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button className="rounded bg-brand-600 text-white px-4 py-2 hover:bg-brand-700">Add</button>
+        <button className="btn-primary">Add</button>
       </form>
 
-      {isLoading && <p className="text-gray-500">Loading…</p>}
-      {spaces?.length === 0 && <p className="text-gray-500">No spaces yet.</p>}
+      {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
+      {spaces?.length === 0 && <p className="text-slate-500 dark:text-slate-400">No spaces yet.</p>}
       <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {spaces?.map((s) => (
           <li key={s.id}>
-            <Link to={`/spaces/${s.id}`} className="block bg-white rounded-lg shadow-sm border overflow-hidden hover:border-brand-500">
-              <div className="aspect-square bg-gray-100 flex items-center justify-center">
+            <Link
+              to={`/spaces/${s.id}`}
+              className="card-glass block overflow-hidden hover:bg-white/80 dark:hover:bg-white/10 transition-colors"
+            >
+              <div className="aspect-square bg-slate-100/60 dark:bg-white/5 flex items-center justify-center">
                 {s.currentPhoto ? (
                   <img src={api.thumbnailUrl(s.currentPhoto.id)} alt={s.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-gray-400 text-sm">No photo</span>
+                  <span className="text-slate-400 dark:text-slate-500 text-sm">No photo</span>
                 )}
               </div>
-              <div className="px-2 py-2 text-sm font-medium truncate">{s.name}</div>
+              <div className="px-2 py-2 text-sm font-medium truncate text-slate-800 dark:text-slate-100">{s.name}</div>
             </Link>
           </li>
         ))}

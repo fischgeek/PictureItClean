@@ -30,8 +30,8 @@ export function BuildingPage() {
 
   return (
     <Layout>
-      <Link to="/" className="text-sm text-brand-600 dark:text-brand-400 hover:underline">
-        ← All buildings
+      <Link to="/locations" className="text-sm text-brand-600 dark:text-brand-400 hover:underline">
+        ← All locations
       </Link>
       <div className="flex items-center justify-between mt-2 mb-4">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100">{building?.name || "…"}</h1>

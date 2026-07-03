@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { api } from "../api/client";
 import { Layout } from "../components/Layout";
 
-export function PropertiesPage() {
+export function LocationsPage() {
   const queryClient = useQueryClient();
   const { data: buildings, isLoading } = useQuery({ queryKey: ["buildings"], queryFn: api.listBuildings });
   const [name, setName] = useState("");
@@ -19,7 +19,7 @@ export function PropertiesPage() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-semibold tracking-tight mb-4 text-slate-800 dark:text-slate-100">Properties</h1>
+      <h1 className="text-2xl font-semibold tracking-tight mb-4 text-slate-800 dark:text-slate-100">Locations</h1>
 
       <form
         className="flex gap-2 mb-6"
@@ -39,7 +39,7 @@ export function PropertiesPage() {
 
       {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
       {buildings?.length === 0 && (
-        <p className="text-slate-500 dark:text-slate-400">No properties yet. Add one above, or accept a share invite link.</p>
+        <p className="text-slate-500 dark:text-slate-400">No locations yet. Add one above, or accept a share invite link.</p>
       )}
       <ul className="space-y-2">
         {buildings?.map((b) => (

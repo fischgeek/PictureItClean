@@ -8,8 +8,8 @@ import { AreaPage } from "./pages/AreaPage";
 import { BuildingPage } from "./pages/BuildingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { InviteAcceptPage } from "./pages/InviteAcceptPage";
+import { LocationsPage } from "./pages/LocationsPage";
 import { LoginPage } from "./pages/LoginPage";
-import { PropertiesPage } from "./pages/PropertiesPage";
 import { SpacePage } from "./pages/SpacePage";
 
 export default function App() {
@@ -25,10 +25,10 @@ export default function App() {
         }
       />
       <Route
-        path="/properties"
+        path="/locations"
         element={
           <RequireAuth>
-            <PropertiesPage />
+            <LocationsPage />
           </RequireAuth>
         }
       />

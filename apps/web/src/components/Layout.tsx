@@ -28,10 +28,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {user && (
               <>
                 <Link
-                  to="/properties"
-                  title="Properties"
-                  aria-label="Properties"
-                  className={`icon-btn ${location.pathname === "/properties" ? "icon-btn-active" : ""}`}
+                  to="/locations"
+                  title="Locations"
+                  aria-label="Locations"
+                  className={`icon-btn ${location.pathname === "/locations" ? "icon-btn-active" : ""}`}
                 >
                   <BuildingIcon />
                 </Link>

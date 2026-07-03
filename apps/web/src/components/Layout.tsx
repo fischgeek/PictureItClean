@@ -1,12 +1,19 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { AssignmentsIcon, LogoutIcon, UsersIcon } from "./icons";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?";
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <div className="min-h-screen">
@@ -14,33 +21,50 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
           <Link to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-800 dark:text-slate-100">
             <Logo size={30} />
-            Picture It Clean
+            <span className="hidden sm:inline">Picture It Clean</span>
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             {user && (
-              <div className="flex items-center gap-2 text-sm">
+              <>
                 {user.role === "admin" && (
                   <>
-                    <Link to="/admin/assignments" className="btn-ghost">
-                      Assignments
+                    <Link
+                      to="/admin/assignments"
+                      title="Assignments"
+                      aria-label="Assignments"
+                      className={`icon-btn ${location.pathname === "/admin/assignments" ? "icon-btn-active" : ""}`}
+                    >
+                      <AssignmentsIcon />
                     </Link>
-                    <Link to="/admin/users" className="btn-ghost">
-                      Users
+                    <Link
+                      to="/admin/users"
+                      title="Users"
+                      aria-label="Users"
+                      className={`icon-btn ${location.pathname === "/admin/users" ? "icon-btn-active" : ""}`}
+                    >
+                      <UsersIcon />
                     </Link>
                   </>
                 )}
-                <span className="hidden sm:inline text-slate-600 dark:text-slate-300">{user.displayName}</span>
+                <span
+                  title={user.displayName}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-accent-500 text-white text-xs font-semibold select-none"
+                >
+                  {initials(user.displayName)}
+                </span>
                 <button
-                  className="btn-ghost"
+                  title="Log out"
+                  aria-label="Log out"
+                  className="icon-btn"
                   onClick={async () => {
                     await logout();
                     navigate("/login");
                   }}
                 >
-                  Log out
+                  <LogoutIcon />
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>

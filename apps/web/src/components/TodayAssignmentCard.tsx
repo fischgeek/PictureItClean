@@ -2,6 +2,22 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { DashboardData, api } from "../api/client";
 
+function formatMinutes(total: number) {
+  if (total < 60) return `${total} min`;
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
+  return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
+}
+
+function PoolSummary({ data }: { data: DashboardData }) {
+  return (
+    <p className="text-sm text-slate-500 dark:text-slate-400">
+      {data.assignedSpaceCount} space{data.assignedSpaceCount === 1 ? "" : "s"} assigned to you · about{" "}
+      {formatMinutes(data.assignedTotalMinutes)} total to keep them all clean
+    </p>
+  );
+}
+
 export function TodayAssignmentCard({ data }: { data: DashboardData }) {
   if (!data.hasAssignmentPool) {
     return (
@@ -18,7 +34,8 @@ export function TodayAssignmentCard({ data }: { data: DashboardData }) {
     return (
       <div className="card-glass p-4 mb-6">
         <h2 className="text-lg font-medium mb-1 text-slate-700 dark:text-slate-200">Your assignment</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">Nothing to show right now — check back later.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Nothing to show right now — check back later.</p>
+        <PoolSummary data={data} />
       </div>
     );
   }
@@ -45,12 +62,15 @@ export function TodayAssignmentCard({ data }: { data: DashboardData }) {
             {building?.name}
             {area ? ` › ${area.name}` : ""}
           </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
             {checklistItems.length} checklist item{checklistItems.length === 1 ? "" : "s"} · ~{totalMinutes} min · every{" "}
             {space.frequencyDays} day{space.frequencyDays === 1 ? "" : "s"}
             {lastVerifiedAt && <> · last done {new Date(lastVerifiedAt).toLocaleDateString()}</>}
             {!lastVerifiedAt && <> · never verified</>}
           </p>
+          <div className="mb-3">
+            <PoolSummary data={data} />
+          </div>
           <Link to={`/spaces/${space.id}`} className="btn-primary">
             Go verify
           </Link>

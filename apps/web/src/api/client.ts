@@ -107,6 +107,8 @@ export interface MyAssignment {
 export interface DashboardData {
   myAssignment: MyAssignment | null;
   hasAssignmentPool: boolean;
+  assignedSpaceCount: number;
+  assignedTotalMinutes: number;
   overdueSpaces: {
     spaceId: string;
     spaceName: string;

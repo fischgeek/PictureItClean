@@ -31,6 +31,10 @@ function safe<T>(label: string, fn: () => T, fallback: T): T {
 function computeAssignment(userId: string) {
   const assignedSpaceIds = resolveAssignedSpaceIds(userId);
   const hasAssignmentPool = assignedSpaceIds.length > 0;
+  const assignedTotalMinutes = assignedSpaceIds.reduce(
+    (sum, spaceId) => sum + repos.checklistItems.listBySpace(spaceId).reduce((s, i) => s + i.estimatedMinutes, 0),
+    0
+  );
   const today = todayIso();
 
   let active = repos.dailyAssignments.findActive(userId, today);
@@ -60,7 +64,7 @@ function computeAssignment(userId: string) {
     }
   }
 
-  return { myAssignment, hasAssignmentPool };
+  return { myAssignment, hasAssignmentPool, assignedSpaceCount: assignedSpaceIds.length, assignedTotalMinutes };
 }
 
 dashboardRouter.get("/dashboard", (req, res) => {
@@ -73,15 +77,17 @@ dashboardRouter.get("/dashboard", (req, res) => {
   const trend = safe("verificationTrend", () => verificationTrend(allSpaceIds, 14), []);
   const activity = safe("activityByUser", () => activityByUser(allSpaceIds), []);
   const complianceByBuilding = rollups.map((b) => ({ buildingId: b.id, name: b.name, percent: b.percent }));
-  const { myAssignment, hasAssignmentPool } = safe(
+  const { myAssignment, hasAssignmentPool, assignedSpaceCount, assignedTotalMinutes } = safe(
     "computeAssignment",
     () => computeAssignment(userId),
-    { myAssignment: null, hasAssignmentPool: false }
+    { myAssignment: null, hasAssignmentPool: false, assignedSpaceCount: 0, assignedTotalMinutes: 0 }
   );
 
   res.json({
     myAssignment,
     hasAssignmentPool,
+    assignedSpaceCount,
+    assignedTotalMinutes,
     overdueSpaces,
     complianceByBuilding,
     verificationTrend: trend,

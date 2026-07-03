@@ -76,6 +76,12 @@ JWT_SECRET=some-long-random-string
 DATA_PATH_ON_HOST=/mnt/storage01/picture-it-clean
 ```
 
+By default the app is served over plain HTTP, which is normal for a LAN deployment — the auth
+cookie is **not** marked `Secure` in that case, since browsers silently refuse to store `Secure`
+cookies over HTTP (login would appear to work but every following request would be
+unauthenticated). If you later put this behind a reverse proxy that terminates HTTPS, set
+`COOKIE_SECURE=true` so the cookie is protected in transit.
+
 All your data (buildings, areas, spaces, checklists, photos, verification history) lives under
 that path — back it up and you have the whole app's state.
 

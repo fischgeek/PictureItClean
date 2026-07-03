@@ -5,10 +5,14 @@ import { requireAuth } from "../middleware/auth";
 
 export const authRouter = Router();
 
+// Secure cookies are only stored by browsers over HTTPS. Self-hosted deployments are commonly
+// accessed over plain HTTP on a LAN, so this must NOT be tied to NODE_ENV=="production" (a
+// production build isn't the same thing as an HTTPS deployment). Set COOKIE_SECURE=true only
+// once this app is actually served over HTTPS (e.g. behind a TLS-terminating reverse proxy).
 const COOKIE_OPTS = {
   httpOnly: true,
   sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  secure: process.env.COOKIE_SECURE === "true",
   maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 

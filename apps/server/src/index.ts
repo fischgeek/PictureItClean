@@ -4,11 +4,13 @@ import cors from "cors";
 import express from "express";
 import "express-async-errors";
 import path from "node:path";
+import { adminAssignmentsRouter } from "./routes/adminAssignments";
 import { adminUsersRouter } from "./routes/adminUsers";
 import { areasRouter } from "./routes/areas";
 import { authRouter } from "./routes/auth";
 import { buildingsRouter } from "./routes/buildings";
 import { checklistItemsRouter } from "./routes/checklistItems";
+import { dashboardRouter } from "./routes/dashboard";
 import { invitesRouter } from "./routes/invites";
 import { photosRouter } from "./routes/photos";
 import { spacesRouter } from "./routes/spaces";
@@ -29,7 +31,9 @@ app.use("/api", checklistItemsRouter);
 app.use("/api", photosRouter);
 app.use("/api", invitesRouter);
 app.use("/api", verificationsRouter);
-app.use("/api", adminUsersRouter);
+app.use("/api/admin", adminUsersRouter);
+app.use("/api/admin", adminAssignmentsRouter);
+app.use("/api", dashboardRouter);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err);

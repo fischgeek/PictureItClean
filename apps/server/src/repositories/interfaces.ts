@@ -1,7 +1,9 @@
 import {
   Area,
+  Assignment,
   Building,
   ChecklistItem,
+  DailyAssignment,
   Invite,
   Membership,
   Photo,
@@ -28,6 +30,7 @@ export interface BuildingRepository {
   create(input: { name: string; createdBy: string }): Building;
   findById(id: string): Building | null;
   listForUser(userId: string): Building[];
+  listAll(): Building[];
   update(id: string, input: { name: string }): Building;
   delete(id: string): void;
 }
@@ -41,10 +44,13 @@ export interface AreaRepository {
 }
 
 export interface SpaceRepository {
-  create(input: { areaId: string; name: string; sortOrder: number }): Space;
+  create(input: { areaId: string; name: string; sortOrder: number; frequencyDays?: number }): Space;
   findById(id: string): Space | null;
   listByArea(areaId: string): Space[];
-  update(id: string, input: Partial<{ name: string; sortOrder: number; currentPhotoId: string | null }>): Space;
+  update(
+    id: string,
+    input: Partial<{ name: string; sortOrder: number; currentPhotoId: string | null; frequencyDays: number }>
+  ): Space;
   delete(id: string): void;
 }
 
@@ -64,6 +70,7 @@ export interface ChecklistItemRepository {
 
 export interface MembershipRepository {
   create(input: { userId: string; resourceType: ResourceType; resourceId: string; role: Role }): Membership;
+  findExact(userId: string, resourceType: ResourceType, resourceId: string): Membership | null;
   listForUserOnChain(userId: string, chain: { resourceType: ResourceType; resourceId: string }[]): Membership[];
   listForResource(resourceType: ResourceType, resourceId: string): Membership[];
 }
@@ -87,4 +94,16 @@ export interface VerificationEventRepository {
     note: string | null;
   }): VerificationEvent;
   listBySpace(spaceId: string): VerificationEvent[];
+}
+
+export interface AssignmentRepository {
+  /** Replaces the full assigned-resource set for a user in one transaction. */
+  replaceForUser(userId: string, items: { resourceType: ResourceType; resourceId: string }[], createdBy: string): void;
+  listForUser(userId: string): Assignment[];
+}
+
+export interface DailyAssignmentRepository {
+  findActive(userId: string, assignedDate: string): DailyAssignment | null;
+  create(input: { userId: string; spaceId: string; assignedDate: string }): DailyAssignment;
+  markCompleted(userId: string, spaceId: string, assignedDate: string): void;
 }

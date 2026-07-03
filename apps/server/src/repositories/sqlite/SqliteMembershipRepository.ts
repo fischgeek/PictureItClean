@@ -19,6 +19,13 @@ export class SqliteMembershipRepository implements MembershipRepository {
     return mapMembership(row);
   }
 
+  findExact(userId: string, resourceType: ResourceType, resourceId: string) {
+    const row = db
+      .prepare(`SELECT * FROM memberships WHERE user_id = ? AND resource_type = ? AND resource_id = ?`)
+      .get(userId, resourceType, resourceId);
+    return row ? mapMembership(row) : null;
+  }
+
   listForUserOnChain(userId: string, chain: { resourceType: ResourceType; resourceId: string }[]) {
     if (chain.length === 0) return [];
     const placeholders = chain.map(() => "(resource_type = ? AND resource_id = ?)").join(" OR ");

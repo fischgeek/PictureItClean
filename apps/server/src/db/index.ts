@@ -14,12 +14,17 @@ db.exec("PRAGMA foreign_keys = ON");
 const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf-8");
 db.exec(schema);
 
-// Runtime migration: existing deployments created their users table before the `role` column
-// existed, and CREATE TABLE IF NOT EXISTS above is a no-op against an already-existing table.
-const userColumns = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
-if (!userColumns.some((c) => c.name === "role")) {
-  db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
+// Runtime migrations: CREATE TABLE IF NOT EXISTS above is a no-op against tables that already
+// existed before a column was added, so already-deployed databases need an explicit ALTER TABLE.
+function ensureColumn(table: string, column: string, ddl: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!columns.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
 }
+
+ensureColumn("users", "role", "role TEXT NOT NULL DEFAULT 'user'");
+ensureColumn("spaces", "frequency_days", "frequency_days INTEGER NOT NULL DEFAULT 7");
 
 // Bootstrap: guarantee at least one admin exists. Covers both a freshly-migrated database
 // (existing users all defaulted to 'user' above) and any other state that somehow ended up

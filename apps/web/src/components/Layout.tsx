@@ -21,9 +21,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {user && (
               <div className="flex items-center gap-2 text-sm">
                 {user.role === "admin" && (
-                  <Link to="/admin/users" className="btn-ghost">
-                    Users
-                  </Link>
+                  <>
+                    <Link to="/admin/assignments" className="btn-ghost">
+                      Assignments
+                    </Link>
+                    <Link to="/admin/users" className="btn-ghost">
+                      Users
+                    </Link>
+                  </>
                 )}
                 <span className="hidden sm:inline text-slate-600 dark:text-slate-300">{user.displayName}</span>
                 <button

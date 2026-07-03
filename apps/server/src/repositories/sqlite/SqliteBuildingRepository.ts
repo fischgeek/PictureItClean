@@ -33,6 +33,11 @@ export class SqliteBuildingRepository implements BuildingRepository {
     return rows.map(mapBuilding);
   }
 
+  listAll() {
+    const rows = db.prepare(`SELECT * FROM buildings ORDER BY created_at ASC`).all();
+    return rows.map(mapBuilding);
+  }
+
   update(id: string, input: { name: string }) {
     db.prepare(`UPDATE buildings SET name = ? WHERE id = ?`).run(input.name, id);
     return this.findById(id)!;

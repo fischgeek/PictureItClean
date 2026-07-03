@@ -4,8 +4,12 @@ Picture It Clean helps volunteers verify that a space (a counter, a room, a pew 
 matches a reference "clean" photo, using a short checklist with time estimates.
 
 Data is hierarchical: **Building/House → Area → Space**. Each Space has a current reference
-photo, a checklist, and a history of past verifications. Buildings, Areas, and Spaces can be
-shared with other users via invite links.
+photo, a checklist, a cleaning **frequency** (every N days), and a history of past verifications.
+Buildings, Areas, and Spaces can be shared with other users via invite links, or **assigned** to
+a user by an admin — that user then gets a stable, weighted-random "today's assignment" on their
+dashboard, favoring whatever is most overdue. The dashboard also rolls space compliance (verified
+within its frequency window) up to an area %, then a building %, alongside trend/activity charts
+and an overdue list.
 
 This repository currently contains the **self-hosted edition** (v1): a single Node.js/Express
 API + React frontend, backed by SQLite and local-disk photo storage, packaged as one Docker

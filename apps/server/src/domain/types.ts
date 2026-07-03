@@ -42,6 +42,7 @@ export interface Space {
   name: string;
   sortOrder: number;
   currentPhotoId: string | null;
+  frequencyDays: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,4 +92,22 @@ export interface VerificationEvent {
   checklistSnapshot: { id: string; text: string; estimatedMinutes: number; checked: boolean }[];
   note: string | null;
   completedAt: string;
+}
+
+export interface Assignment {
+  id: string;
+  userId: string;
+  resourceType: ResourceType;
+  resourceId: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface DailyAssignment {
+  id: string;
+  userId: string;
+  spaceId: string;
+  assignedDate: string;
+  createdAt: string;
+  completedAt: string | null;
 }

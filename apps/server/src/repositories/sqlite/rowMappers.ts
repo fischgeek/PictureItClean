@@ -1,4 +1,16 @@
-import { Area, Building, ChecklistItem, Invite, Membership, Photo, Space, User, VerificationEvent } from "../../domain/types";
+import {
+  Area,
+  Assignment,
+  Building,
+  ChecklistItem,
+  DailyAssignment,
+  Invite,
+  Membership,
+  Photo,
+  Space,
+  User,
+  VerificationEvent,
+} from "../../domain/types";
 
 export const mapUser = (row: any): User => ({
   id: row.id,
@@ -30,6 +42,7 @@ export const mapSpace = (row: any): Space => ({
   name: row.name,
   sortOrder: row.sort_order,
   currentPhotoId: row.current_photo_id,
+  frequencyDays: row.frequency_days,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -78,5 +91,23 @@ export const mapVerificationEvent = (row: any): VerificationEvent => ({
   userId: row.user_id,
   checklistSnapshot: JSON.parse(row.checklist_snapshot_json),
   note: row.note,
+  completedAt: row.completed_at,
+});
+
+export const mapAssignment = (row: any): Assignment => ({
+  id: row.id,
+  userId: row.user_id,
+  resourceType: row.resource_type,
+  resourceId: row.resource_id,
+  createdBy: row.created_by,
+  createdAt: row.created_at,
+});
+
+export const mapDailyAssignment = (row: any): DailyAssignment => ({
+  id: row.id,
+  userId: row.user_id,
+  spaceId: row.space_id,
+  assignedDate: row.assigned_date,
+  createdAt: row.created_at,
   completedAt: row.completed_at,
 });

@@ -5,16 +5,18 @@ import { requireAdmin } from "../middleware/requireAdmin";
 import { hashPassword, toPublicUser } from "../services/auth";
 import { UserRole } from "../domain/types";
 
+// Mounted at /api/admin -- a distinct prefix (not bare /api) so this router's blanket
+// requireAdmin can never intercept unrelated non-admin endpoints registered elsewhere.
 export const adminUsersRouter = Router();
 adminUsersRouter.use(requireAuth, requireAdmin);
 
 const VALID_ROLES: UserRole[] = ["user", "admin"];
 
-adminUsersRouter.get("/admin/users", (req, res) => {
+adminUsersRouter.get("/users", (req, res) => {
   res.json(repos.users.listAll().map(toPublicUser));
 });
 
-adminUsersRouter.post("/admin/users", async (req, res) => {
+adminUsersRouter.post("/users", async (req, res) => {
   const { username, password, displayName, role } = req.body ?? {};
   if (!username || typeof username !== "string" || !password || typeof password !== "string") {
     res.status(400).json({ error: "username and password are required" });
@@ -37,7 +39,7 @@ adminUsersRouter.post("/admin/users", async (req, res) => {
   res.status(201).json(toPublicUser(user));
 });
 
-adminUsersRouter.patch("/admin/users/:id", async (req, res) => {
+adminUsersRouter.patch("/users/:id", async (req, res) => {
   const target = repos.users.findById(req.params.id);
   if (!target) {
     res.status(404).json({ error: "user not found" });
@@ -70,7 +72,7 @@ adminUsersRouter.patch("/admin/users/:id", async (req, res) => {
   res.json(toPublicUser(repos.users.findById(target.id)!));
 });
 
-adminUsersRouter.delete("/admin/users/:id", (req, res) => {
+adminUsersRouter.delete("/users/:id", (req, res) => {
   const target = repos.users.findById(req.params.id);
   if (!target) {
     res.status(404).json({ error: "user not found" });

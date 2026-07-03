@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS spaces (
   name TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0,
   current_photo_id TEXT,
+  frequency_days INTEGER NOT NULL DEFAULT 7,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -80,6 +81,31 @@ CREATE TABLE IF NOT EXISTS verification_events (
   completed_at TEXT NOT NULL
 );
 
+-- Who is responsible for cleaning what. Assigning a building/area covers all of its
+-- descendant spaces (resolved at query time); a space can also be assigned directly.
+CREATE TABLE IF NOT EXISTS assignments (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  resource_type TEXT NOT NULL CHECK (resource_type IN ('building','area','space')),
+  resource_id TEXT NOT NULL,
+  created_by TEXT NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL,
+  UNIQUE(user_id, resource_type, resource_id)
+);
+
+-- The stable "today's task" pick per user. A new row is created when none is active for
+-- today (or the active one was just completed); completed_at is set when the matching
+-- verification is submitted.
+CREATE TABLE IF NOT EXISTS daily_assignments (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+  assigned_date TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  completed_at TEXT,
+  UNIQUE(user_id, assigned_date, space_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_areas_building ON areas(building_id);
 CREATE INDEX IF NOT EXISTS idx_spaces_area ON spaces(area_id);
 CREATE INDEX IF NOT EXISTS idx_photos_space ON photos(space_id);
@@ -87,3 +113,5 @@ CREATE INDEX IF NOT EXISTS idx_checklist_space ON checklist_items(space_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_user ON memberships(user_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_resource ON memberships(resource_type, resource_id);
 CREATE INDEX IF NOT EXISTS idx_verification_space ON verification_events(space_id);
+CREATE INDEX IF NOT EXISTS idx_assignments_user ON assignments(user_id);
+CREATE INDEX IF NOT EXISTS idx_daily_assignments_user_date ON daily_assignments(user_id, assigned_date);

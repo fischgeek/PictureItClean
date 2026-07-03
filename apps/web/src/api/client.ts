@@ -1,4 +1,5 @@
 export type UserRole = "user" | "admin";
+export type ResourceType = "building" | "area" | "space";
 
 export interface PublicUser {
   id: string;
@@ -38,6 +39,7 @@ export interface Space {
   sortOrder: number;
   currentPhotoId: string | null;
   currentPhoto?: Photo | null;
+  frequencyDays: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,6 +75,49 @@ export interface VerificationEvent {
   note: string | null;
   completedAt: string;
   user?: PublicUser;
+}
+
+export interface AssignmentOptionSpace extends Space {}
+export interface AssignmentOptionArea extends Area {
+  spaces: AssignmentOptionSpace[];
+}
+export interface AssignmentOptionBuilding extends Building {
+  areas: AssignmentOptionArea[];
+}
+
+export interface AssignmentItem {
+  id: string;
+  userId: string;
+  resourceType: ResourceType;
+  resourceId: string;
+  resourceName: string | null;
+  createdAt: string;
+}
+
+export interface MyAssignment {
+  space: Space;
+  area: Area | null;
+  building: Building | null;
+  checklistItems: ChecklistItem[];
+  currentPhoto: Photo | null;
+  lastVerifiedAt: string | null;
+  assignedDate: string;
+}
+
+export interface DashboardData {
+  myAssignment: MyAssignment | null;
+  hasAssignmentPool: boolean;
+  overdueSpaces: {
+    spaceId: string;
+    spaceName: string;
+    areaName: string;
+    buildingName: string;
+    frequencyDays: number;
+    daysOverdue: number | null;
+  }[];
+  complianceByBuilding: { buildingId: string; name: string; percent: number | null }[];
+  verificationTrend: { date: string; count: number }[];
+  activityByUser: { userId: string; displayName: string; count: number }[];
 }
 
 class ApiError extends Error {
@@ -116,10 +161,11 @@ export const api = {
   deleteArea: (id: string) => request<void>(`/areas/${id}`, { method: "DELETE" }),
 
   listSpaces: (areaId: string) => request<Space[]>(`/areas/${areaId}/spaces`),
-  createSpace: (areaId: string, name: string) =>
-    request<Space>(`/areas/${areaId}/spaces`, { method: "POST", body: JSON.stringify({ name }) }),
+  createSpace: (areaId: string, name: string, frequencyDays?: number) =>
+    request<Space>(`/areas/${areaId}/spaces`, { method: "POST", body: JSON.stringify({ name, frequencyDays }) }),
   getSpace: (id: string) => request<SpaceDetail>(`/spaces/${id}`),
-  updateSpace: (id: string, name: string) => request<Space>(`/spaces/${id}`, { method: "PATCH", body: JSON.stringify({ name }) }),
+  updateSpace: (id: string, input: Partial<{ name: string; frequencyDays: number }>) =>
+    request<Space>(`/spaces/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
   deleteSpace: (id: string) => request<void>(`/spaces/${id}`, { method: "DELETE" }),
   uploadSpacePhoto: (id: string, file: File) => {
     const form = new FormData();
@@ -161,6 +207,13 @@ export const api = {
   resetUserPassword: (id: string, password: string) =>
     request<PublicUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify({ password }) }),
   deleteUser: (id: string) => request<void>(`/admin/users/${id}`, { method: "DELETE" }),
+
+  getDashboard: () => request<DashboardData>("/dashboard"),
+
+  listAssignmentOptions: () => request<AssignmentOptionBuilding[]>("/admin/assignment-options"),
+  getUserAssignments: (userId: string) => request<AssignmentItem[]>(`/admin/assignments/${userId}`),
+  setUserAssignments: (userId: string, items: { resourceType: ResourceType; resourceId: string }[]) =>
+    request<AssignmentItem[]>(`/admin/assignments/${userId}`, { method: "PUT", body: JSON.stringify({ items }) }),
 };
 
 export { ApiError };

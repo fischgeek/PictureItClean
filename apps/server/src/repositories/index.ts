@@ -1,6 +1,8 @@
 import { SqliteAreaRepository } from "./sqlite/SqliteAreaRepository";
+import { SqliteAssignmentRepository } from "./sqlite/SqliteAssignmentRepository";
 import { SqliteBuildingRepository } from "./sqlite/SqliteBuildingRepository";
 import { SqliteChecklistItemRepository } from "./sqlite/SqliteChecklistItemRepository";
+import { SqliteDailyAssignmentRepository } from "./sqlite/SqliteDailyAssignmentRepository";
 import { SqliteInviteRepository } from "./sqlite/SqliteInviteRepository";
 import { SqliteMembershipRepository } from "./sqlite/SqliteMembershipRepository";
 import { SqlitePhotoRepository } from "./sqlite/SqlitePhotoRepository";
@@ -20,4 +22,6 @@ export const repos = {
   memberships: new SqliteMembershipRepository(),
   invites: new SqliteInviteRepository(),
   verificationEvents: new SqliteVerificationEventRepository(),
+  assignments: new SqliteAssignmentRepository(),
+  dailyAssignments: new SqliteDailyAssignmentRepository(),
 };

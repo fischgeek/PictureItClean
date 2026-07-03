@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { RequireAdmin } from "./components/RequireAdmin";
 import { RequireAuth } from "./components/RequireAuth";
+import { AdminAssignmentsPage } from "./pages/AdminAssignmentsPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { AreaPage } from "./pages/AreaPage";
 import { BuildingPage } from "./pages/BuildingPage";
@@ -60,6 +61,16 @@ export default function App() {
           <RequireAuth>
             <RequireAdmin>
               <AdminUsersPage />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin/assignments"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminAssignmentsPage />
             </RequireAdmin>
           </RequireAuth>
         }

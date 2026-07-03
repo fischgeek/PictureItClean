@@ -2,11 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/client";
+import { DashboardStats } from "../components/DashboardStats";
 import { Layout } from "../components/Layout";
+import { TodayAssignmentCard } from "../components/TodayAssignmentCard";
 
 export function DashboardPage() {
   const queryClient = useQueryClient();
   const { data: buildings, isLoading } = useQuery({ queryKey: ["buildings"], queryFn: api.listBuildings });
+  const { data: dashboard } = useQuery({ queryKey: ["dashboard"], queryFn: api.getDashboard });
   const [name, setName] = useState("");
 
   const createBuilding = useMutation({
@@ -19,6 +22,13 @@ export function DashboardPage() {
 
   return (
     <Layout>
+      {dashboard && (
+        <>
+          <TodayAssignmentCard data={dashboard} />
+          <DashboardStats data={dashboard} />
+        </>
+      )}
+
       <h1 className="text-2xl font-semibold tracking-tight mb-4 text-slate-800 dark:text-slate-100">
         Your Buildings &amp; Houses
       </h1>

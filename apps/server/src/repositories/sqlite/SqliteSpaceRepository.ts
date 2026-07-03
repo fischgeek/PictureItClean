@@ -4,13 +4,13 @@ import { SpaceRepository } from "../interfaces";
 import { mapSpace } from "./rowMappers";
 
 export class SqliteSpaceRepository implements SpaceRepository {
-  create(input: { areaId: string; name: string; sortOrder: number }) {
+  create(input: { areaId: string; name: string; sortOrder: number; frequencyDays?: number }) {
     const id = uuid();
     const now = new Date().toISOString();
     db.prepare(
-      `INSERT INTO spaces (id, area_id, name, sort_order, current_photo_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, NULL, ?, ?)`
-    ).run(id, input.areaId, input.name, input.sortOrder, now, now);
+      `INSERT INTO spaces (id, area_id, name, sort_order, current_photo_id, frequency_days, created_at, updated_at)
+       VALUES (?, ?, ?, ?, NULL, ?, ?, ?)`
+    ).run(id, input.areaId, input.name, input.sortOrder, input.frequencyDays ?? 7, now, now);
     return this.findById(id)!;
   }
 
@@ -26,18 +26,18 @@ export class SqliteSpaceRepository implements SpaceRepository {
     return rows.map(mapSpace);
   }
 
-  update(id: string, input: Partial<{ name: string; sortOrder: number; currentPhotoId: string | null }>) {
+  update(
+    id: string,
+    input: Partial<{ name: string; sortOrder: number; currentPhotoId: string | null; frequencyDays: number }>
+  ) {
     const current = this.findById(id)!;
     const name = input.name ?? current.name;
     const sortOrder = input.sortOrder ?? current.sortOrder;
     const currentPhotoId = input.currentPhotoId === undefined ? current.currentPhotoId : input.currentPhotoId;
-    db.prepare(`UPDATE spaces SET name = ?, sort_order = ?, current_photo_id = ?, updated_at = ? WHERE id = ?`).run(
-      name,
-      sortOrder,
-      currentPhotoId,
-      new Date().toISOString(),
-      id
-    );
+    const frequencyDays = input.frequencyDays ?? current.frequencyDays;
+    db.prepare(
+      `UPDATE spaces SET name = ?, sort_order = ?, current_photo_id = ?, frequency_days = ?, updated_at = ? WHERE id = ?`
+    ).run(name, sortOrder, currentPhotoId, frequencyDays, new Date().toISOString(), id);
     return this.findById(id)!;
   }
 

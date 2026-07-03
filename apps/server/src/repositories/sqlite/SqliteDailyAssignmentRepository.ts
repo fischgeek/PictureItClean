@@ -4,14 +4,26 @@ import { DailyAssignmentRepository } from "../interfaces";
 import { mapDailyAssignment } from "./rowMappers";
 
 export class SqliteDailyAssignmentRepository implements DailyAssignmentRepository {
-  findActive(userId: string, assignedDate: string) {
-    const row = db
+  listActive(userId: string, today: string) {
+    const rows = db
       .prepare(
         `SELECT * FROM daily_assignments
-         WHERE user_id = ? AND assigned_date = ? AND completed_at IS NULL
-         ORDER BY created_at DESC LIMIT 1`
+         WHERE user_id = ? AND completed_at IS NULL AND assigned_date <= ?
+         ORDER BY assigned_date ASC, created_at ASC`
       )
-      .get(userId, assignedDate);
+      .all(userId, today);
+    return rows.map(mapDailyAssignment);
+  }
+
+  hasAnyForDate(userId: string, date: string) {
+    const row = db
+      .prepare(`SELECT COUNT(*) AS n FROM daily_assignments WHERE user_id = ? AND assigned_date = ?`)
+      .get(userId, date) as { n: number };
+    return row.n > 0;
+  }
+
+  findById(id: string) {
+    const row = db.prepare(`SELECT * FROM daily_assignments WHERE id = ?`).get(id);
     return row ? mapDailyAssignment(row) : null;
   }
 
@@ -22,14 +34,18 @@ export class SqliteDailyAssignmentRepository implements DailyAssignmentRepositor
       `INSERT INTO daily_assignments (id, user_id, space_id, assigned_date, created_at, completed_at)
        VALUES (?, ?, ?, ?, ?, NULL)`
     ).run(id, input.userId, input.spaceId, input.assignedDate, createdAt);
-    const row = db.prepare(`SELECT * FROM daily_assignments WHERE id = ?`).get(id);
-    return mapDailyAssignment(row);
+    return this.findById(id)!;
   }
 
-  markCompleted(userId: string, spaceId: string, assignedDate: string) {
+  markCompletedForSpace(userId: string, spaceId: string) {
     db.prepare(
       `UPDATE daily_assignments SET completed_at = ?
-       WHERE user_id = ? AND space_id = ? AND assigned_date = ? AND completed_at IS NULL`
-    ).run(new Date().toISOString(), userId, spaceId, assignedDate);
+       WHERE user_id = ? AND space_id = ? AND completed_at IS NULL`
+    ).run(new Date().toISOString(), userId, spaceId);
+  }
+
+  reschedule(id: string, newDate: string) {
+    db.prepare(`UPDATE daily_assignments SET assigned_date = ? WHERE id = ?`).run(newDate, id);
+    return this.findById(id)!;
   }
 }

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { api } from "../api/client";
+import { AssignmentCarousel } from "../components/AssignmentCarousel";
+import { AssignmentSummaryCard } from "../components/AssignmentSummaryCard";
 import { DashboardStats } from "../components/DashboardStats";
 import { Layout } from "../components/Layout";
-import { TodayAssignmentCard } from "../components/TodayAssignmentCard";
 
 export function DashboardPage() {
   const {
@@ -32,7 +33,8 @@ export function DashboardPage() {
 
       {dashboard && (
         <>
-          <TodayAssignmentCard data={dashboard} />
+          <AssignmentSummaryCard data={dashboard} />
+          <AssignmentCarousel assignments={dashboard.assignments} />
           <DashboardStats data={dashboard} />
         </>
       )}

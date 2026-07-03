@@ -10,6 +10,7 @@ import {
   pickWeightedRandomSpace,
   resolveAssignedSpaceIds,
   todayIso,
+  tomorrowIso,
   verificationTrend,
 } from "../services/stats";
 
@@ -28,43 +29,52 @@ function safe<T>(label: string, fn: () => T, fallback: T): T {
   }
 }
 
+function buildAssignmentDetail(active: { id: string; spaceId: string; assignedDate: string }) {
+  const space = repos.spaces.findById(active.spaceId);
+  if (!space) return null;
+  const area = repos.areas.findById(space.areaId);
+  const building = area ? repos.buildings.findById(area.buildingId) : null;
+  const checklistItems = repos.checklistItems.listBySpace(space.id);
+  const currentPhoto = space.currentPhotoId ? repos.photos.findById(space.currentPhotoId) : null;
+  const lastVerifiedAt = latestVerifiedMap([space.id]).get(space.id) ?? null;
+  return {
+    id: active.id,
+    space,
+    area,
+    building,
+    checklistItems,
+    currentPhoto,
+    lastVerifiedAt,
+    assignedDate: active.assignedDate,
+  };
+}
+
+/** Pending (not-yet-completed) assignments carry forward day to day if ignored -- ignoring one
+ * doesn't lose it, it just keeps showing up as overdue. Exactly one new pick is issued per user
+ * per calendar day (skipping doesn't trigger an extra one; it just reschedules for tomorrow),
+ * so the list only grows if the user doesn't keep up with it. */
 function computeAssignment(userId: string) {
   const assignedSpaceIds = resolveAssignedSpaceIds(userId);
   const hasAssignmentPool = assignedSpaceIds.length > 0;
-  const assignedTotalMinutes = assignedSpaceIds.reduce(
-    (sum, spaceId) => sum + repos.checklistItems.listBySpace(spaceId).reduce((s, i) => s + i.estimatedMinutes, 0),
-    0
-  );
   const today = todayIso();
 
-  let active = repos.dailyAssignments.findActive(userId, today);
-  if (!active && hasAssignmentPool) {
-    const pick = pickWeightedRandomSpace(assignedSpaceIds);
-    if (pick) active = repos.dailyAssignments.create({ userId, spaceId: pick, assignedDate: today });
+  if (hasAssignmentPool && !repos.dailyAssignments.hasAnyForDate(userId, today)) {
+    const alreadyPendingSpaceIds = repos.dailyAssignments.listActive(userId, today).map((a) => a.spaceId);
+    const pick = pickWeightedRandomSpace(assignedSpaceIds, alreadyPendingSpaceIds);
+    if (pick) repos.dailyAssignments.create({ userId, spaceId: pick, assignedDate: today });
   }
 
-  let myAssignment = null;
-  if (active) {
-    const space = repos.spaces.findById(active.spaceId);
-    if (space) {
-      const area = repos.areas.findById(space.areaId);
-      const building = area ? repos.buildings.findById(area.buildingId) : null;
-      const checklistItems = repos.checklistItems.listBySpace(space.id);
-      const currentPhoto = space.currentPhotoId ? repos.photos.findById(space.currentPhotoId) : null;
-      const lastVerifiedAt = latestVerifiedMap([space.id]).get(space.id) ?? null;
-      myAssignment = {
-        space,
-        area,
-        building,
-        checklistItems,
-        currentPhoto,
-        lastVerifiedAt,
-        assignedDate: active.assignedDate,
-      };
-    }
-  }
+  const assignments = repos.dailyAssignments
+    .listActive(userId, today)
+    .map(buildAssignmentDetail)
+    .filter((a): a is NonNullable<typeof a> => a !== null);
 
-  return { myAssignment, hasAssignmentPool, assignedSpaceCount: assignedSpaceIds.length, assignedTotalMinutes };
+  const pendingTotalMinutes = assignments.reduce(
+    (sum, a) => sum + a.checklistItems.reduce((s, i) => s + i.estimatedMinutes, 0),
+    0
+  );
+
+  return { assignments, hasAssignmentPool, pendingCount: assignments.length, pendingTotalMinutes };
 }
 
 dashboardRouter.get("/dashboard", (req, res) => {
@@ -77,20 +87,34 @@ dashboardRouter.get("/dashboard", (req, res) => {
   const trend = safe("verificationTrend", () => verificationTrend(allSpaceIds, 14), []);
   const activity = safe("activityByUser", () => activityByUser(allSpaceIds), []);
   const complianceByBuilding = rollups.map((b) => ({ buildingId: b.id, name: b.name, percent: b.percent }));
-  const { myAssignment, hasAssignmentPool, assignedSpaceCount, assignedTotalMinutes } = safe(
+  const { assignments, hasAssignmentPool, pendingCount, pendingTotalMinutes } = safe(
     "computeAssignment",
     () => computeAssignment(userId),
-    { myAssignment: null, hasAssignmentPool: false, assignedSpaceCount: 0, assignedTotalMinutes: 0 }
+    { assignments: [], hasAssignmentPool: false, pendingCount: 0, pendingTotalMinutes: 0 }
   );
 
   res.json({
-    myAssignment,
+    assignments,
     hasAssignmentPool,
-    assignedSpaceCount,
-    assignedTotalMinutes,
+    pendingCount,
+    pendingTotalMinutes,
     overdueSpaces,
     complianceByBuilding,
     verificationTrend: trend,
     activityByUser: activity,
   });
+});
+
+dashboardRouter.post("/assignments/:id/skip", (req, res) => {
+  const assignment = repos.dailyAssignments.findById(req.params.id);
+  if (!assignment || assignment.userId !== req.user!.id) {
+    res.status(404).json({ error: "assignment not found" });
+    return;
+  }
+  if (assignment.completedAt) {
+    res.status(400).json({ error: "already completed" });
+    return;
+  }
+  const updated = repos.dailyAssignments.reschedule(assignment.id, tomorrowIso());
+  res.json(updated);
 });

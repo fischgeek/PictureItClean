@@ -3,7 +3,6 @@ import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { hasRole } from "../services/accessControl";
 import { toPublicUser } from "../services/auth";
-import { todayIso } from "../services/stats";
 
 export const verificationsRouter = Router();
 verificationsRouter.use(requireAuth);
@@ -41,6 +40,6 @@ verificationsRouter.post("/spaces/:spaceId/verify", (req, res) => {
     checklistSnapshot: snapshot,
     note: typeof note === "string" && note.trim() ? note.trim() : null,
   });
-  repos.dailyAssignments.markCompleted(req.user!.id, req.params.spaceId, todayIso());
+  repos.dailyAssignments.markCompletedForSpace(req.user!.id, req.params.spaceId);
   res.status(201).json(event);
 });

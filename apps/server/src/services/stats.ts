@@ -8,6 +8,10 @@ export function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+export function tomorrowIso(): string {
+  return new Date(Date.now() + DAY_MS).toISOString().slice(0, 10);
+}
+
 function daysSince(dateIso: string | undefined | null, now: number): number | null {
   if (!dateIso) return null;
   return (now - new Date(dateIso).getTime()) / DAY_MS;
@@ -175,12 +179,17 @@ export function resolveAssignedSpaceIds(userId: string): string[] {
   return Array.from(spaceIds);
 }
 
-/** Weighted random pick favoring overdue spaces; never-verified spaces are treated as very overdue. */
-export function pickWeightedRandomSpace(spaceIds: string[]): string | null {
-  if (spaceIds.length === 0) return null;
+/** Weighted random pick favoring overdue spaces; never-verified spaces are treated as very overdue.
+ * `excludeIds` keeps a space from being picked again while it already has a pending assignment. */
+export function pickWeightedRandomSpace(spaceIds: string[], excludeIds: string[] = []): string | null {
+  const excluded = new Set(excludeIds);
+  const candidateIds = spaceIds.filter((id) => !excluded.has(id));
+  const pool = candidateIds.length > 0 ? candidateIds : spaceIds;
+  if (pool.length === 0) return null;
+
   const now = Date.now();
-  const lastMap = latestVerifiedMap(spaceIds);
-  const spaces = spaceIds.map((id) => repos.spaces.findById(id)).filter((s): s is NonNullable<typeof s> => s !== null);
+  const lastMap = latestVerifiedMap(pool);
+  const spaces = pool.map((id) => repos.spaces.findById(id)).filter((s): s is NonNullable<typeof s> => s !== null);
   if (spaces.length === 0) return null;
 
   const weights = spaces.map((space) => {

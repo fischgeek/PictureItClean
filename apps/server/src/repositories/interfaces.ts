@@ -103,7 +103,14 @@ export interface AssignmentRepository {
 }
 
 export interface DailyAssignmentRepository {
-  findActive(userId: string, assignedDate: string): DailyAssignment | null;
+  /** Not-yet-completed assignments due today or earlier (i.e. still owed), oldest first. */
+  listActive(userId: string, today: string): DailyAssignment[];
+  /** Whether a pick (of any completion status) has already been issued to this user for this date. */
+  hasAnyForDate(userId: string, date: string): boolean;
+  findById(id: string): DailyAssignment | null;
   create(input: { userId: string; spaceId: string; assignedDate: string }): DailyAssignment;
-  markCompleted(userId: string, spaceId: string, assignedDate: string): void;
+  /** Completes whatever active assignment exists for this user+space, regardless of its assigned_date. */
+  markCompletedForSpace(userId: string, spaceId: string): void;
+  /** Reschedules an assignment to a new date (used by "skip for a day"). */
+  reschedule(id: string, newDate: string): DailyAssignment;
 }

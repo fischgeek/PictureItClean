@@ -95,6 +95,7 @@ export interface AssignmentItem {
 }
 
 export interface MyAssignment {
+  id: string;
   space: Space;
   area: Area | null;
   building: Building | null;
@@ -105,10 +106,10 @@ export interface MyAssignment {
 }
 
 export interface DashboardData {
-  myAssignment: MyAssignment | null;
+  assignments: MyAssignment[];
   hasAssignmentPool: boolean;
-  assignedSpaceCount: number;
-  assignedTotalMinutes: number;
+  pendingCount: number;
+  pendingTotalMinutes: number;
   overdueSpaces: {
     spaceId: string;
     spaceName: string;
@@ -211,6 +212,7 @@ export const api = {
   deleteUser: (id: string) => request<void>(`/admin/users/${id}`, { method: "DELETE" }),
 
   getDashboard: () => request<DashboardData>("/dashboard"),
+  skipAssignment: (id: string) => request(`/assignments/${id}/skip`, { method: "POST" }),
 
   listAssignmentOptions: () => request<AssignmentOptionBuilding[]>("/admin/assignment-options"),
   getUserAssignments: (userId: string) => request<AssignmentItem[]>(`/admin/assignments/${userId}`),

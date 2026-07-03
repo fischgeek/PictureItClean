@@ -108,7 +108,7 @@ export function SpacePage() {
             <span className="text-slate-400 dark:text-slate-500">No reference photo yet</span>
           )}
         </div>
-        {editMode && (
+        {(editMode || !space.currentPhoto) && (
           <div className="p-3 border-t border-white/40 dark:border-white/10">
             <input
               ref={fileInput}

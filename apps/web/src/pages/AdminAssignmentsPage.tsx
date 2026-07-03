@@ -46,7 +46,7 @@ export function AdminAssignmentsPage() {
     onSuccess: () => {
       setSaved(true);
       queryClient.invalidateQueries({ queryKey: ["user-assignments", userId] });
-      setTimeout(() => setSaved(false), 3000);
+      setTimeout(() => setSaved(false), 8000);
     },
   });
 

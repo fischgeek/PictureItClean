@@ -31,6 +31,20 @@ export function UsersIcon({ size = 18 }: IconProps) {
   );
 }
 
+export function BuildingIcon({ size = 18 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M6 22V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v18" />
+      <path d="M3 22h18" />
+      <path d="M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3" />
+      <line x1="9" y1="7" x2="9" y2="7.01" />
+      <line x1="15" y1="7" x2="15" y2="7.01" />
+      <line x1="9" y1="12" x2="9" y2="12.01" />
+      <line x1="15" y1="12" x2="15" y2="12.01" />
+    </svg>
+  );
+}
+
 export function LogoutIcon({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>

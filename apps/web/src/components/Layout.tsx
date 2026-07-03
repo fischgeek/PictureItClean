@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import { AssignmentsIcon, LogoutIcon, UsersIcon } from "./icons";
+import { AssignmentsIcon, BuildingIcon, LogoutIcon, UsersIcon } from "./icons";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -27,6 +27,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
             {user && (
               <>
+                <Link
+                  to="/properties"
+                  title="Properties"
+                  aria-label="Properties"
+                  className={`icon-btn ${location.pathname === "/properties" ? "icon-btn-active" : ""}`}
+                >
+                  <BuildingIcon />
+                </Link>
                 {user.role === "admin" && (
                   <>
                     <Link

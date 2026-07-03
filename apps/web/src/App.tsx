@@ -9,6 +9,7 @@ import { BuildingPage } from "./pages/BuildingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { InviteAcceptPage } from "./pages/InviteAcceptPage";
 import { LoginPage } from "./pages/LoginPage";
+import { PropertiesPage } from "./pages/PropertiesPage";
 import { SpacePage } from "./pages/SpacePage";
 
 export default function App() {
@@ -20,6 +21,14 @@ export default function App() {
         element={
           <RequireAuth>
             <DashboardPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/properties"
+        element={
+          <RequireAuth>
+            <PropertiesPage />
           </RequireAuth>
         }
       />

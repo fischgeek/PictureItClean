@@ -25,6 +25,8 @@ export const mapBuilding = (row: any): Building => ({
   id: row.id,
   name: row.name,
   createdBy: row.created_by,
+  photoPath: row.photo_path,
+  thumbnailPath: row.thumbnail_path,
   createdAt: row.created_at,
 });
 
@@ -33,6 +35,8 @@ export const mapArea = (row: any): Area => ({
   buildingId: row.building_id,
   name: row.name,
   sortOrder: row.sort_order,
+  photoPath: row.photo_path,
+  thumbnailPath: row.thumbnail_path,
   createdAt: row.created_at,
 });
 

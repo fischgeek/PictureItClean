@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS buildings (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   created_by TEXT NOT NULL REFERENCES users(id),
+  photo_path TEXT,
+  thumbnail_path TEXT,
   created_at TEXT NOT NULL
 );
 
@@ -19,6 +21,8 @@ CREATE TABLE IF NOT EXISTS areas (
   building_id TEXT NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0,
+  photo_path TEXT,
+  thumbnail_path TEXT,
   created_at TEXT NOT NULL
 );
 

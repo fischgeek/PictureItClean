@@ -38,8 +38,17 @@ export class SqliteBuildingRepository implements BuildingRepository {
     return rows.map(mapBuilding);
   }
 
-  update(id: string, input: { name: string }) {
-    db.prepare(`UPDATE buildings SET name = ? WHERE id = ?`).run(input.name, id);
+  update(id: string, input: Partial<{ name: string; photoPath: string | null; thumbnailPath: string | null }>) {
+    const current = this.findById(id)!;
+    const name = input.name ?? current.name;
+    const photoPath = input.photoPath === undefined ? current.photoPath : input.photoPath;
+    const thumbnailPath = input.thumbnailPath === undefined ? current.thumbnailPath : input.thumbnailPath;
+    db.prepare(`UPDATE buildings SET name = ?, photo_path = ?, thumbnail_path = ? WHERE id = ?`).run(
+      name,
+      photoPath,
+      thumbnailPath,
+      id
+    );
     return this.findById(id)!;
   }
 

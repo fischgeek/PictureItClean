@@ -12,6 +12,8 @@ export interface Building {
   id: string;
   name: string;
   createdBy: string;
+  photoPath: string | null;
+  thumbnailPath: string | null;
   createdAt: string;
 }
 
@@ -20,6 +22,8 @@ export interface Area {
   buildingId: string;
   name: string;
   sortOrder: number;
+  photoPath: string | null;
+  thumbnailPath: string | null;
   createdAt: string;
 }
 
@@ -155,6 +159,14 @@ export const api = {
   updateBuilding: (id: string, name: string) =>
     request<Building>(`/buildings/${id}`, { method: "PATCH", body: JSON.stringify({ name }) }),
   deleteBuilding: (id: string) => request<void>(`/buildings/${id}`, { method: "DELETE" }),
+  uploadBuildingPhoto: (id: string, file: File) => {
+    const form = new FormData();
+    form.append("photo", file);
+    return request<Building>(`/buildings/${id}/photo`, { method: "POST", body: form });
+  },
+  deleteBuildingPhoto: (id: string) => request<Building>(`/buildings/${id}/photo`, { method: "DELETE" }),
+  buildingPhotoUrl: (id: string) => `/api/buildings/${id}/photo/file`,
+  buildingThumbnailUrl: (id: string) => `/api/buildings/${id}/photo/thumbnail`,
 
   listAreas: (buildingId: string) => request<Area[]>(`/buildings/${buildingId}/areas`),
   createArea: (buildingId: string, name: string) =>
@@ -162,6 +174,14 @@ export const api = {
   getArea: (id: string) => request<Area>(`/areas/${id}`),
   updateArea: (id: string, name: string) => request<Area>(`/areas/${id}`, { method: "PATCH", body: JSON.stringify({ name }) }),
   deleteArea: (id: string) => request<void>(`/areas/${id}`, { method: "DELETE" }),
+  uploadAreaPhoto: (id: string, file: File) => {
+    const form = new FormData();
+    form.append("photo", file);
+    return request<Area>(`/areas/${id}/photo`, { method: "POST", body: form });
+  },
+  deleteAreaPhoto: (id: string) => request<Area>(`/areas/${id}/photo`, { method: "DELETE" }),
+  areaPhotoUrl: (id: string) => `/api/areas/${id}/photo/file`,
+  areaThumbnailUrl: (id: string) => `/api/areas/${id}/photo/thumbnail`,
 
   listSpaces: (areaId: string) => request<Space[]>(`/areas/${areaId}/spaces`),
   createSpace: (areaId: string, name: string, frequencyDays?: number) =>
@@ -176,6 +196,7 @@ export const api = {
     return request<Photo>(`/spaces/${id}/photo`, { method: "POST", body: form });
   },
   listSpacePhotos: (id: string) => request<Photo[]>(`/spaces/${id}/photos`),
+  deleteSpacePhoto: (photoId: string) => request<void>(`/photos/${photoId}`, { method: "DELETE" }),
 
   listChecklistItems: (spaceId: string) => request<ChecklistItem[]>(`/spaces/${spaceId}/checklist-items`),
   createChecklistItem: (spaceId: string, text: string, estimatedMinutes: number) =>

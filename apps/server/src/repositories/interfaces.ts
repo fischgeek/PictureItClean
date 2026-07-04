@@ -31,7 +31,7 @@ export interface BuildingRepository {
   findById(id: string): Building | null;
   listForUser(userId: string): Building[];
   listAll(): Building[];
-  update(id: string, input: { name: string }): Building;
+  update(id: string, input: Partial<{ name: string; photoPath: string | null; thumbnailPath: string | null }>): Building;
   delete(id: string): void;
 }
 
@@ -39,7 +39,10 @@ export interface AreaRepository {
   create(input: { buildingId: string; name: string; sortOrder: number }): Area;
   findById(id: string): Area | null;
   listByBuilding(buildingId: string): Area[];
-  update(id: string, input: Partial<{ name: string; sortOrder: number }>): Area;
+  update(
+    id: string,
+    input: Partial<{ name: string; sortOrder: number; photoPath: string | null; thumbnailPath: string | null }>
+  ): Area;
   delete(id: string): void;
 }
 
@@ -58,6 +61,7 @@ export interface PhotoRepository {
   create(input: { spaceId: string; filePath: string; thumbnailPath: string; uploadedBy: string }): Photo;
   findById(id: string): Photo | null;
   listBySpace(spaceId: string): Photo[];
+  delete(id: string): void;
 }
 
 export interface ChecklistItemRepository {
@@ -110,10 +114,16 @@ export interface DailyAssignmentRepository {
   /** Distinct space ids ever issued to this user (any date, any completion status) -- used to tell
    * a brand-new assignment (never seen before) apart from the ongoing daily rotation. */
   listIssuedSpaceIds(userId: string): string[];
+  /** Distinct space ids with a currently-active (not completed) row, regardless of assigned_date --
+   * including ones pushed into the future by a skip. Used so the daily picker never issues a second
+   * active row for a space that already has one, which would collide on a later reschedule. */
+  listActiveSpaceIds(userId: string): string[];
   findById(id: string): DailyAssignment | null;
   create(input: { userId: string; spaceId: string; assignedDate: string }): DailyAssignment;
   /** Completes whatever active assignment exists for this user+space, regardless of its assigned_date. */
   markCompletedForSpace(userId: string, spaceId: string): void;
-  /** Reschedules an assignment to a new date (used by "skip for a day"). */
-  reschedule(id: string, newDate: string): DailyAssignment;
+  /** Reschedules an assignment to a new date (used by "skip for a day"). Returns null if a
+   * duplicate assignment for the same user/space/date already existed, in which case this
+   * row was dropped instead of colliding with it. */
+  reschedule(id: string, newDate: string): DailyAssignment | null;
 }

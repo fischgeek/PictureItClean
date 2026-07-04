@@ -1,10 +1,14 @@
 import { Router } from "express";
+import multer from "multer";
 import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/requireRole";
+import { absolutePhotoPath, deletePhotoFiles, savePhoto } from "../services/storage";
 
 export const buildingsRouter = Router();
 buildingsRouter.use(requireAuth);
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
 
 buildingsRouter.get("/", (req, res) => {
   res.json(repos.buildings.listForUser(req.user!.id));
@@ -34,3 +38,52 @@ buildingsRouter.delete("/:buildingId", requireRole("building", "buildingId", "ow
   repos.buildings.delete(req.params.buildingId);
   res.status(204).send();
 });
+
+buildingsRouter.post(
+  "/:buildingId/photo",
+  requireRole("building", "buildingId", "editor"),
+  upload.single("photo"),
+  async (req, res) => {
+    if (!req.file) {
+      res.status(400).json({ error: "photo file is required (field name 'photo')" });
+      return;
+    }
+    const current = repos.buildings.findById(req.params.buildingId)!;
+    const stored = await savePhoto(req.params.buildingId, req.file.buffer);
+    deletePhotoFiles(current.photoPath, current.thumbnailPath);
+    const building = repos.buildings.update(req.params.buildingId, {
+      photoPath: stored.filePath,
+      thumbnailPath: stored.thumbnailPath,
+    });
+    res.status(201).json(building);
+  }
+);
+
+buildingsRouter.delete("/:buildingId/photo", requireRole("building", "buildingId", "editor"), (req, res) => {
+  const current = repos.buildings.findById(req.params.buildingId)!;
+  deletePhotoFiles(current.photoPath, current.thumbnailPath);
+  const building = repos.buildings.update(req.params.buildingId, { photoPath: null, thumbnailPath: null });
+  res.json(building);
+});
+
+function serveBuildingPhoto(field: "photoPath" | "thumbnailPath") {
+  return (req: any, res: any) => {
+    const building = repos.buildings.findById(req.params.buildingId);
+    if (!building || !building[field]) {
+      res.status(404).json({ error: "photo not found" });
+      return;
+    }
+    res.sendFile(absolutePhotoPath(building[field]!));
+  };
+}
+
+buildingsRouter.get(
+  "/:buildingId/photo/file",
+  requireRole("building", "buildingId", "viewer"),
+  serveBuildingPhoto("photoPath")
+);
+buildingsRouter.get(
+  "/:buildingId/photo/thumbnail",
+  requireRole("building", "buildingId", "viewer"),
+  serveBuildingPhoto("thumbnailPath")
+);

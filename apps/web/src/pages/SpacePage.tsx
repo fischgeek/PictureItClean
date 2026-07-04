@@ -5,6 +5,8 @@ import { api } from "../api/client";
 import { EditableTitle } from "../components/EditableTitle";
 import { Layout } from "../components/Layout";
 import { ShareModal } from "../components/ShareModal";
+import { PlusIcon, TrashIcon } from "../components/icons";
+import { useLightbox } from "../components/Lightbox";
 
 export function SpacePage() {
   const { spaceId } = useParams<{ spaceId: string }>();
@@ -21,11 +23,21 @@ export function SpacePage() {
 
   const { data: space, isLoading } = useQuery({ queryKey: ["space", spaceId], queryFn: () => api.getSpace(spaceId!) });
   const { data: history } = useQuery({ queryKey: ["verifications", spaceId], queryFn: () => api.listVerifications(spaceId!) });
+  const { data: photos } = useQuery({ queryKey: ["space-photos", spaceId], queryFn: () => api.listSpacePhotos(spaceId!) });
+  const { open: openLightbox } = useLightbox();
 
-  const invalidateSpace = () => queryClient.invalidateQueries({ queryKey: ["space", spaceId] });
+  const invalidateSpace = () => {
+    queryClient.invalidateQueries({ queryKey: ["space", spaceId] });
+    queryClient.invalidateQueries({ queryKey: ["space-photos", spaceId] });
+  };
 
   const uploadPhoto = useMutation({
     mutationFn: (file: File) => api.uploadSpacePhoto(spaceId!, file),
+    onSuccess: invalidateSpace,
+  });
+
+  const deletePhoto = useMutation({
+    mutationFn: (photoId: string) => api.deleteSpacePhoto(photoId),
     onSuccess: invalidateSpace,
   });
 
@@ -103,30 +115,60 @@ export function SpacePage() {
         </div>
       </div>
 
-      <div className="card-glass overflow-hidden mb-4">
-        <div className="aspect-video bg-slate-100/60 dark:bg-white/5 flex items-center justify-center">
-          {space.currentPhoto ? (
-            <img src={api.photoUrl(space.currentPhoto.id)} alt={space.name} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-slate-400 dark:text-slate-500">No reference photo yet</span>
-          )}
+      <div className="card-glass p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-medium text-slate-700 dark:text-slate-200">Photos</h2>
         </div>
-        {(editMode || !space.currentPhoto) && (
-          <div className="p-3 border-t border-white/40 dark:border-white/10">
-            <input
-              ref={fileInput}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) uploadPhoto.mutate(file);
-              }}
-            />
-            <button className="text-sm text-brand-600 dark:text-brand-400 hover:underline" onClick={() => fileInput.current?.click()}>
-              {space.currentPhoto ? "Replace photo" : "Upload photo"}
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) uploadPhoto.mutate(file);
+            e.target.value = "";
+          }}
+        />
+        {photos && photos.length > 0 ? (
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {photos.map((photo) => (
+              <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden group">
+                <img
+                  src={api.thumbnailUrl(photo.id)}
+                  alt={space.name}
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={() => openLightbox(api.photoUrl(photo.id), space.name)}
+                />
+                {editMode && (
+                  <button
+                    className="absolute top-1 right-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-600/80 transition-colors"
+                    onClick={() => {
+                      if (confirm("Delete this photo?")) deletePhoto.mutate(photo.id);
+                    }}
+                    aria-label="Delete photo"
+                  >
+                    <TrashIcon size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              className="aspect-square rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:border-brand-400 hover:text-brand-500 transition-colors"
+              onClick={() => fileInput.current?.click()}
+              aria-label="Add photo"
+            >
+              <PlusIcon size={24} />
             </button>
           </div>
+        ) : (
+          <button
+            className="w-full aspect-video rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex flex-col items-center justify-center gap-2 text-slate-400 dark:text-slate-500 hover:border-brand-400 hover:text-brand-500 transition-colors"
+            onClick={() => fileInput.current?.click()}
+          >
+            <PlusIcon size={28} />
+            <span className="text-sm">Add a photo</span>
+          </button>
         )}
       </div>
 

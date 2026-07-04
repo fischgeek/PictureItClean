@@ -25,6 +25,10 @@ function ensureColumn(table: string, column: string, ddl: string) {
 
 ensureColumn("users", "role", "role TEXT NOT NULL DEFAULT 'user'");
 ensureColumn("spaces", "frequency_days", "frequency_days INTEGER NOT NULL DEFAULT 7");
+ensureColumn("buildings", "photo_path", "photo_path TEXT");
+ensureColumn("buildings", "thumbnail_path", "thumbnail_path TEXT");
+ensureColumn("areas", "photo_path", "photo_path TEXT");
+ensureColumn("areas", "thumbnail_path", "thumbnail_path TEXT");
 
 // Bootstrap: guarantee at least one admin exists. Covers both a freshly-migrated database
 // (existing users all defaulted to 'user' above) and any other state that somehow ended up

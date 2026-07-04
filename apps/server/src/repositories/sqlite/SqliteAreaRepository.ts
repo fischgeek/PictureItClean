@@ -25,11 +25,22 @@ export class SqliteAreaRepository implements AreaRepository {
     return rows.map(mapArea);
   }
 
-  update(id: string, input: Partial<{ name: string; sortOrder: number }>) {
+  update(
+    id: string,
+    input: Partial<{ name: string; sortOrder: number; photoPath: string | null; thumbnailPath: string | null }>
+  ) {
     const current = this.findById(id)!;
     const name = input.name ?? current.name;
     const sortOrder = input.sortOrder ?? current.sortOrder;
-    db.prepare(`UPDATE areas SET name = ?, sort_order = ? WHERE id = ?`).run(name, sortOrder, id);
+    const photoPath = input.photoPath === undefined ? current.photoPath : input.photoPath;
+    const thumbnailPath = input.thumbnailPath === undefined ? current.thumbnailPath : input.thumbnailPath;
+    db.prepare(`UPDATE areas SET name = ?, sort_order = ?, photo_path = ?, thumbnail_path = ? WHERE id = ?`).run(
+      name,
+      sortOrder,
+      photoPath,
+      thumbnailPath,
+      id
+    );
     return this.findById(id)!;
   }
 

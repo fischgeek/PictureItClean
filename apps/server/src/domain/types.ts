@@ -25,6 +25,8 @@ export interface Building {
   id: string;
   name: string;
   createdBy: string;
+  photoPath: string | null;
+  thumbnailPath: string | null;
   createdAt: string;
 }
 
@@ -33,6 +35,8 @@ export interface Area {
   buildingId: string;
   name: string;
   sortOrder: number;
+  photoPath: string | null;
+  thumbnailPath: string | null;
   createdAt: string;
 }
 

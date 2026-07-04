@@ -67,7 +67,9 @@ function computeAssignment(userId: string) {
     }
 
     if (brandNew.length === 0 && !repos.dailyAssignments.hasAnyForDate(userId, today)) {
-      const alreadyPendingSpaceIds = repos.dailyAssignments.listActive(userId, today).map((a) => a.spaceId);
+      // Exclude spaces with ANY active row, not just ones due today/overdue -- a skipped
+      // assignment is active but dated in the future, and must still block a second pick.
+      const alreadyPendingSpaceIds = repos.dailyAssignments.listActiveSpaceIds(userId);
       const pick = pickWeightedRandomSpace(assignedSpaceIds, alreadyPendingSpaceIds);
       if (pick) repos.dailyAssignments.create({ userId, spaceId: pick, assignedDate: today });
     }
@@ -125,5 +127,5 @@ dashboardRouter.post("/assignments/:id/skip", (req, res) => {
     return;
   }
   const updated = repos.dailyAssignments.reschedule(assignment.id, tomorrowIso());
-  res.json(updated);
+  res.json(updated ?? { id: assignment.id, dropped: true });
 });

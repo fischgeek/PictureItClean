@@ -5,31 +5,45 @@ import { v4 as uuid } from "uuid";
 import { photosDir } from "../db";
 
 export interface StoredPhoto {
-  filePath: string; // relative path, stored in DB, served via /api/photos/file/:relpath
+  filePath: string; // relative path, stored in DB
   thumbnailPath: string;
 }
 
-/** Local-disk photo storage. Swap this module for a different backend (e.g. Jira attachments) without touching routes. */
-export async function savePhoto(spaceId: string, buffer: Buffer): Promise<StoredPhoto> {
-  const spaceDir = path.join(photosDir, spaceId);
-  fs.mkdirSync(spaceDir, { recursive: true });
+/** Local-disk photo storage, namespaced by owning resource id (a space/area/building id -- any
+ * UUID works as a folder name). Swap this module for a different backend (e.g. Jira attachments)
+ * without touching routes. */
+export async function savePhoto(ownerId: string, buffer: Buffer): Promise<StoredPhoto> {
+  const ownerDir = path.join(photosDir, ownerId);
+  fs.mkdirSync(ownerDir, { recursive: true });
 
   const id = uuid();
   const fileName = `${id}.jpg`;
   const thumbName = `${id}_thumb.jpg`;
 
-  const fullPath = path.join(spaceDir, fileName);
-  const thumbPath = path.join(spaceDir, thumbName);
+  const fullPath = path.join(ownerDir, fileName);
+  const thumbPath = path.join(ownerDir, thumbName);
 
   await sharp(buffer).rotate().resize({ width: 1600, withoutEnlargement: true }).jpeg({ quality: 82 }).toFile(fullPath);
   await sharp(buffer).rotate().resize({ width: 400, withoutEnlargement: true }).jpeg({ quality: 75 }).toFile(thumbPath);
 
   return {
-    filePath: path.join(spaceId, fileName).split(path.sep).join("/"),
-    thumbnailPath: path.join(spaceId, thumbName).split(path.sep).join("/"),
+    filePath: path.join(ownerId, fileName).split(path.sep).join("/"),
+    thumbnailPath: path.join(ownerId, thumbName).split(path.sep).join("/"),
   };
 }
 
 export function absolutePhotoPath(relPath: string): string {
   return path.join(photosDir, relPath);
+}
+
+/** Best-effort disk cleanup -- failures are swallowed since the DB row is the source of truth. */
+export function deletePhotoFiles(...relPaths: (string | null | undefined)[]) {
+  for (const relPath of relPaths) {
+    if (!relPath) continue;
+    try {
+      fs.unlinkSync(absolutePhotoPath(relPath));
+    } catch {
+      // ignore
+    }
+  }
 }

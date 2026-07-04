@@ -29,6 +29,13 @@ export class SqliteDailyAssignmentRepository implements DailyAssignmentRepositor
     return rows.map((r) => r.spaceId);
   }
 
+  listActiveSpaceIds(userId: string) {
+    const rows = db
+      .prepare(`SELECT DISTINCT space_id AS spaceId FROM daily_assignments WHERE user_id = ? AND completed_at IS NULL`)
+      .all(userId) as { spaceId: string }[];
+    return rows.map((r) => r.spaceId);
+  }
+
   findById(id: string) {
     const row = db.prepare(`SELECT * FROM daily_assignments WHERE id = ?`).get(id);
     return row ? mapDailyAssignment(row) : null;
@@ -52,7 +59,17 @@ export class SqliteDailyAssignmentRepository implements DailyAssignmentRepositor
   }
 
   reschedule(id: string, newDate: string) {
-    db.prepare(`UPDATE daily_assignments SET assigned_date = ? WHERE id = ?`).run(newDate, id);
+    try {
+      db.prepare(`UPDATE daily_assignments SET assigned_date = ? WHERE id = ?`).run(newDate, id);
+    } catch (err: any) {
+      if (err?.code === "ERR_SQLITE_ERROR" && /UNIQUE constraint failed/.test(String(err.message))) {
+        // A different row already covers this user/space/date (e.g. a stale duplicate from
+        // before the uniqueness constraint existed) -- drop this one instead of crashing.
+        db.prepare(`DELETE FROM daily_assignments WHERE id = ?`).run(id);
+        return null;
+      }
+      throw err;
+    }
     return this.findById(id)!;
   }
 }

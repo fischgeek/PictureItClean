@@ -3,7 +3,7 @@ import multer from "multer";
 import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { hasRole } from "../services/accessControl";
-import { absolutePhotoPath, savePhoto } from "../services/storage";
+import { absolutePhotoPath, deletePhotoFiles, savePhoto } from "../services/storage";
 
 export const photosRouter = Router();
 photosRouter.use(requireAuth);
@@ -55,3 +55,26 @@ function servePhotoFile(field: "filePath" | "thumbnailPath") {
 
 photosRouter.get("/photos/:photoId/file", servePhotoFile("filePath"));
 photosRouter.get("/photos/:photoId/thumbnail", servePhotoFile("thumbnailPath"));
+
+photosRouter.delete("/photos/:photoId", (req, res) => {
+  const photo = repos.photos.findById(req.params.photoId);
+  if (!photo) {
+    res.status(404).json({ error: "photo not found" });
+    return;
+  }
+  if (!hasRole(req.user!.id, "space", photo.spaceId, "editor")) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+
+  repos.photos.delete(photo.id);
+  deletePhotoFiles(photo.filePath, photo.thumbnailPath);
+
+  const space = repos.spaces.findById(photo.spaceId);
+  if (space?.currentPhotoId === photo.id) {
+    const remaining = repos.photos.listBySpace(photo.spaceId);
+    repos.spaces.update(photo.spaceId, { currentPhotoId: remaining[0]?.id ?? null });
+  }
+
+  res.status(204).send();
+});

@@ -22,4 +22,8 @@ export class SqlitePhotoRepository implements PhotoRepository {
     const rows = db.prepare(`SELECT * FROM photos WHERE space_id = ? ORDER BY created_at DESC`).all(spaceId);
     return rows.map(mapPhoto);
   }
+
+  delete(id: string) {
+    db.prepare(`DELETE FROM photos WHERE id = ?`).run(id);
+  }
 }

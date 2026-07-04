@@ -50,18 +50,27 @@ function buildAssignmentDetail(active: { id: string; spaceId: string; assignedDa
 }
 
 /** Pending (not-yet-completed) assignments carry forward day to day if ignored -- ignoring one
- * doesn't lose it, it just keeps showing up as overdue. Exactly one new pick is issued per user
- * per calendar day (skipping doesn't trigger an extra one; it just reschedules for tomorrow),
- * so the list only grows if the user doesn't keep up with it. */
+ * doesn't lose it, it just keeps showing up as overdue. A brand-new assignment (a space the user
+ * has never been issued before) shows up immediately rather than waiting for the daily rotation --
+ * that throttle (one new pick per calendar day, skipping just reschedules rather than replacing)
+ * only applies once every space in the pool has been introduced at least once. */
 function computeAssignment(userId: string) {
   const assignedSpaceIds = resolveAssignedSpaceIds(userId);
   const hasAssignmentPool = assignedSpaceIds.length > 0;
   const today = todayIso();
 
-  if (hasAssignmentPool && !repos.dailyAssignments.hasAnyForDate(userId, today)) {
-    const alreadyPendingSpaceIds = repos.dailyAssignments.listActive(userId, today).map((a) => a.spaceId);
-    const pick = pickWeightedRandomSpace(assignedSpaceIds, alreadyPendingSpaceIds);
-    if (pick) repos.dailyAssignments.create({ userId, spaceId: pick, assignedDate: today });
+  if (hasAssignmentPool) {
+    const everIssued = new Set(repos.dailyAssignments.listIssuedSpaceIds(userId));
+    const brandNew = assignedSpaceIds.filter((id) => !everIssued.has(id));
+    for (const spaceId of brandNew) {
+      repos.dailyAssignments.create({ userId, spaceId, assignedDate: today });
+    }
+
+    if (brandNew.length === 0 && !repos.dailyAssignments.hasAnyForDate(userId, today)) {
+      const alreadyPendingSpaceIds = repos.dailyAssignments.listActive(userId, today).map((a) => a.spaceId);
+      const pick = pickWeightedRandomSpace(assignedSpaceIds, alreadyPendingSpaceIds);
+      if (pick) repos.dailyAssignments.create({ userId, spaceId: pick, assignedDate: today });
+    }
   }
 
   const assignments = repos.dailyAssignments

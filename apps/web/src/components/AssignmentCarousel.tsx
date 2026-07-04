@@ -52,11 +52,14 @@ function AssignmentCard({ assignment, onSkip, skipping }: { assignment: MyAssign
   );
 }
 
+const DRAG_THRESHOLD = 8;
+
 export function AssignmentCarousel({ assignments }: { assignments: MyAssignment[] }) {
   const queryClient = useQueryClient();
   const [index, setIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
-  const drag = useRef<{ startX: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const pointerState = useRef<{ startX: number; startY: number; dragging: boolean; pointerId: number } | null>(null);
   const trackWidth = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -73,23 +76,38 @@ export function AssignmentCarousel({ assignments }: { assignments: MyAssignment[
 
   const go = (dir: number) => setIndex((i) => Math.min(Math.max(i + dir, 0), assignments.length - 1));
 
+  // Only starts an actual drag (and captures the pointer) once movement clears a small
+  // threshold. Below that, we never touch pointer capture, so a plain tap on a button or link
+  // nested inside a card reaches it normally instead of being swallowed by the carousel.
   const onPointerDown = (e: React.PointerEvent) => {
     if (assignments.length <= 1) return;
     trackWidth.current = containerRef.current?.clientWidth ?? 1;
-    drag.current = { startX: e.clientX };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    pointerState.current = { startX: e.clientX, startY: e.clientY, dragging: false, pointerId: e.pointerId };
   };
   const onPointerMove = (e: React.PointerEvent) => {
-    if (!drag.current) return;
-    setDragOffset(e.clientX - drag.current.startX);
+    const state = pointerState.current;
+    if (!state) return;
+    const dx = e.clientX - state.startX;
+    if (!state.dragging) {
+      const dy = e.clientY - state.startY;
+      if (Math.abs(dx) <= DRAG_THRESHOLD || Math.abs(dx) <= Math.abs(dy)) return;
+      state.dragging = true;
+      setIsDragging(true);
+      (e.currentTarget as HTMLElement).setPointerCapture(state.pointerId);
+    }
+    setDragOffset(dx);
   };
   const endDrag = () => {
-    if (!drag.current) return;
-    const threshold = trackWidth.current * 0.2;
-    if (dragOffset < -threshold) go(1);
-    else if (dragOffset > threshold) go(-1);
+    const state = pointerState.current;
+    if (!state) return;
+    if (state.dragging) {
+      const threshold = trackWidth.current * 0.2;
+      if (dragOffset < -threshold) go(1);
+      else if (dragOffset > threshold) go(-1);
+    }
     setDragOffset(0);
-    drag.current = null;
+    setIsDragging(false);
+    pointerState.current = null;
   };
 
   return (
@@ -103,8 +121,8 @@ export function AssignmentCarousel({ assignments }: { assignments: MyAssignment[
         onPointerCancel={endDrag}
       >
         <div
-          className={`flex ${drag.current ? "" : "transition-transform duration-200 ease-out"}`}
-          style={{ transform: `translateX(calc(${-index * 100}% + ${drag.current ? dragOffset : 0}px))` }}
+          className={`flex ${isDragging ? "" : "transition-transform duration-200 ease-out"}`}
+          style={{ transform: `translateX(calc(${-index * 100}% + ${isDragging ? dragOffset : 0}px))` }}
         >
           {assignments.map((a) => (
             <div key={a.id} className="w-full shrink-0">

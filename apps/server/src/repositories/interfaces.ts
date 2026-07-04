@@ -107,6 +107,9 @@ export interface DailyAssignmentRepository {
   listActive(userId: string, today: string): DailyAssignment[];
   /** Whether a pick (of any completion status) has already been issued to this user for this date. */
   hasAnyForDate(userId: string, date: string): boolean;
+  /** Distinct space ids ever issued to this user (any date, any completion status) -- used to tell
+   * a brand-new assignment (never seen before) apart from the ongoing daily rotation. */
+  listIssuedSpaceIds(userId: string): string[];
   findById(id: string): DailyAssignment | null;
   create(input: { userId: string; spaceId: string; assignedDate: string }): DailyAssignment;
   /** Completes whatever active assignment exists for this user+space, regardless of its assigned_date. */

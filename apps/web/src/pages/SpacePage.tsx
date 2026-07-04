@@ -18,7 +18,6 @@ export function SpacePage() {
   const [note, setNote] = useState("");
   const [newItemText, setNewItemText] = useState("");
   const [newItemMinutes, setNewItemMinutes] = useState(5);
-  const [justVerified, setJustVerified] = useState(false);
 
   const { data: space, isLoading } = useQuery({ queryKey: ["space", spaceId], queryFn: () => api.getSpace(spaceId!) });
   const { data: history } = useQuery({ queryKey: ["verifications", spaceId], queryFn: () => api.listVerifications(spaceId!) });
@@ -69,11 +68,9 @@ export function SpacePage() {
         note
       ),
     onSuccess: () => {
-      setChecked({});
-      setNote("");
-      setJustVerified(true);
       queryClient.invalidateQueries({ queryKey: ["verifications", spaceId] });
-      setTimeout(() => setJustVerified(false), 4000);
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      navigate("/");
     },
   });
 
@@ -223,7 +220,6 @@ export function SpacePage() {
         >
           {allChecked ? "Mark Verified ✓" : "Submit Verification"}
         </button>
-        {justVerified && <p className="text-brand-600 dark:text-brand-400 text-sm mt-2">Verification recorded. Thank you!</p>}
       </div>
 
       <div className="card-glass p-4 mb-4">

@@ -22,6 +22,13 @@ export class SqliteDailyAssignmentRepository implements DailyAssignmentRepositor
     return row.n > 0;
   }
 
+  listIssuedSpaceIds(userId: string) {
+    const rows = db.prepare(`SELECT DISTINCT space_id AS spaceId FROM daily_assignments WHERE user_id = ?`).all(userId) as {
+      spaceId: string;
+    }[];
+    return rows.map((r) => r.spaceId);
+  }
+
   findById(id: string) {
     const row = db.prepare(`SELECT * FROM daily_assignments WHERE id = ?`).get(id);
     return row ? mapDailyAssignment(row) : null;

@@ -59,6 +59,11 @@ function computeAssignment(userId: string) {
   const hasAssignmentPool = assignedSpaceIds.length > 0;
   const today = todayIso();
 
+  // Self-heal on every load, not just when an admin re-saves this user's pool: drop any active
+  // pick for a space that isn't (or is no longer) actually assigned to this user. This also
+  // cleans up legacy rows left over from before assignment-pool changes pruned daily_assignments.
+  repos.dailyAssignments.deleteActiveNotIn(userId, assignedSpaceIds);
+
   if (hasAssignmentPool) {
     const everIssued = new Set(repos.dailyAssignments.listIssuedSpaceIds(userId));
     const brandNew = assignedSpaceIds.filter((id) => !everIssued.has(id));

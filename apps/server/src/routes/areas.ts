@@ -4,6 +4,7 @@ import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/requireRole";
 import { absolutePhotoPath, deletePhotoFiles, savePhoto } from "../services/storage";
+import { effectiveRole } from "../services/accessControl";
 
 export const areasRouter = Router();
 areasRouter.use(requireAuth);
@@ -28,7 +29,9 @@ areasRouter.post("/buildings/:buildingId/areas", requireRole("building", "buildi
 
 // Standalone area resource
 areasRouter.get("/areas/:areaId", requireRole("area", "areaId", "viewer"), (req, res) => {
-  res.json(repos.areas.findById(req.params.areaId));
+  const area = repos.areas.findById(req.params.areaId);
+  const myRole = effectiveRole(req.user!.id, "area", req.params.areaId);
+  res.json({ ...area, myRole });
 });
 
 areasRouter.patch("/areas/:areaId", requireRole("area", "areaId", "editor"), (req, res) => {

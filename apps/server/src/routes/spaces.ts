@@ -2,6 +2,7 @@ import { Router } from "express";
 import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/requireRole";
+import { effectiveRole } from "../services/accessControl";
 
 export const spacesRouter = Router();
 spacesRouter.use(requireAuth);
@@ -35,7 +36,8 @@ spacesRouter.get("/spaces/:spaceId", requireRole("space", "spaceId", "viewer"), 
   const space = repos.spaces.findById(req.params.spaceId)!;
   const checklistItems = repos.checklistItems.listBySpace(space.id);
   const currentPhoto = space.currentPhotoId ? repos.photos.findById(space.currentPhotoId) : null;
-  res.json({ ...space, checklistItems, currentPhoto });
+  const myRole = effectiveRole(req.user!.id, "space", space.id);
+  res.json({ ...space, checklistItems, currentPhoto, myRole });
 });
 
 spacesRouter.patch("/spaces/:spaceId", requireRole("space", "spaceId", "editor"), (req, res) => {

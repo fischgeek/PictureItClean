@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { PencilIcon } from "./icons";
 
-export function EditableTitle({ value, onSave }: { value: string; onSave: (newValue: string) => void }) {
+export function EditableTitle({
+  value,
+  onSave,
+  readOnly = false,
+}: {
+  value: string;
+  onSave: (newValue: string) => void;
+  readOnly?: boolean;
+}) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
@@ -10,6 +18,12 @@ export function EditableTitle({ value, onSave }: { value: string; onSave: (newVa
     setEditing(false);
     if (trimmed && trimmed !== value) onSave(trimmed);
   };
+
+  if (readOnly) {
+    return (
+      <h1 className="text-2xl font-semibold tracking-tight text-slate-800 dark:text-slate-100 truncate">{value}</h1>
+    );
+  }
 
   if (editing) {
     return (

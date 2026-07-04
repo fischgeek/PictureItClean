@@ -120,8 +120,9 @@ export interface DailyAssignmentRepository {
   listActiveSpaceIds(userId: string): string[];
   findById(id: string): DailyAssignment | null;
   create(input: { userId: string; spaceId: string; assignedDate: string }): DailyAssignment;
-  /** Completes whatever active assignment exists for this user+space, regardless of its assigned_date. */
-  markCompletedForSpace(userId: string, spaceId: string): void;
+  /** Completes every active assignment for this space, for every user who has one -- verifying a
+   * space clears it off everyone's pending list, not just the verifier's. */
+  markCompletedForSpace(spaceId: string): void;
   /** Reschedules an assignment to a new date (used by "skip for a day"). Returns null if a
    * duplicate assignment for the same user/space/date already existed, in which case this
    * row was dropped instead of colliding with it. */

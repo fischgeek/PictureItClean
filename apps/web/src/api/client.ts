@@ -1,5 +1,6 @@
 export type UserRole = "user" | "admin";
 export type ResourceType = "building" | "area" | "space";
+export type Role = "owner" | "editor" | "viewer";
 
 export interface PublicUser {
   id: string;
@@ -15,6 +16,7 @@ export interface Building {
   photoPath: string | null;
   thumbnailPath: string | null;
   createdAt: string;
+  myRole?: Role;
 }
 
 export interface Area {
@@ -25,6 +27,7 @@ export interface Area {
   photoPath: string | null;
   thumbnailPath: string | null;
   createdAt: string;
+  myRole?: Role;
 }
 
 export interface Photo {
@@ -50,6 +53,7 @@ export interface Space {
 
 export interface SpaceDetail extends Space {
   checklistItems: ChecklistItem[];
+  myRole?: Role;
 }
 
 export interface ChecklistItem {

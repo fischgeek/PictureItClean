@@ -40,6 +40,6 @@ verificationsRouter.post("/spaces/:spaceId/verify", (req, res) => {
     checklistSnapshot: snapshot,
     note: typeof note === "string" && note.trim() ? note.trim() : null,
   });
-  repos.dailyAssignments.markCompletedForSpace(req.user!.id, req.params.spaceId);
+  repos.dailyAssignments.markCompletedForSpace(req.params.spaceId);
   res.status(201).json(event);
 });

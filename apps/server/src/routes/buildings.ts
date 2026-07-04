@@ -4,6 +4,7 @@ import { repos } from "../repositories";
 import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/requireRole";
 import { absolutePhotoPath, deletePhotoFiles, savePhoto } from "../services/storage";
+import { effectiveRole } from "../services/accessControl";
 
 export const buildingsRouter = Router();
 buildingsRouter.use(requireAuth);
@@ -26,7 +27,9 @@ buildingsRouter.post("/", (req, res) => {
 });
 
 buildingsRouter.get("/:buildingId", requireRole("building", "buildingId", "viewer"), (req, res) => {
-  res.json(repos.buildings.findById(req.params.buildingId));
+  const building = repos.buildings.findById(req.params.buildingId);
+  const myRole = effectiveRole(req.user!.id, "building", req.params.buildingId);
+  res.json({ ...building, myRole });
 });
 
 buildingsRouter.patch("/:buildingId", requireRole("building", "buildingId", "editor"), (req, res) => {

@@ -51,11 +51,11 @@ export class SqliteDailyAssignmentRepository implements DailyAssignmentRepositor
     return this.findById(id)!;
   }
 
-  markCompletedForSpace(userId: string, spaceId: string) {
+  markCompletedForSpace(spaceId: string) {
     db.prepare(
       `UPDATE daily_assignments SET completed_at = ?
-       WHERE user_id = ? AND space_id = ? AND completed_at IS NULL`
-    ).run(new Date().toISOString(), userId, spaceId);
+       WHERE space_id = ? AND completed_at IS NULL`
+    ).run(new Date().toISOString(), spaceId);
   }
 
   reschedule(id: string, newDate: string) {

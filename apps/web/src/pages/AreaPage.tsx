@@ -146,7 +146,9 @@ export function AreaPage() {
       {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
       {spaces?.length === 0 && <p className="text-slate-500 dark:text-slate-400">No spaces yet.</p>}
       <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {spaces?.map((s) => (
+        {[...(spaces ?? [])]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((s) => (
           <li key={s.id}>
             <Link
               to={`/spaces/${s.id}`}

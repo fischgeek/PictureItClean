@@ -146,7 +146,9 @@ export function BuildingPage() {
       {isLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
       {areas?.length === 0 && <p className="text-slate-500 dark:text-slate-400">No areas yet.</p>}
       <ul className="space-y-2">
-        {areas?.map((a) => (
+        {[...(areas ?? [])]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((a) => (
           <li key={a.id}>
             <Link
               to={`/areas/${a.id}`}

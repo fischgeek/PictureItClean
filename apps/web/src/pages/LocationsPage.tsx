@@ -42,7 +42,9 @@ export function LocationsPage() {
         <p className="text-slate-500 dark:text-slate-400">No locations yet. Add one above, or accept a share invite link.</p>
       )}
       <ul className="space-y-2">
-        {buildings?.map((b) => (
+        {[...(buildings ?? [])]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((b) => (
           <li key={b.id}>
             <Link
               to={`/buildings/${b.id}`}

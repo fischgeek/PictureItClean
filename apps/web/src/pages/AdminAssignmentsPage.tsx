@@ -85,7 +85,9 @@ export function AdminAssignmentsPage() {
       {optionsLoading && <p className="text-slate-500 dark:text-slate-400">Loading…</p>}
 
       <div className="card-glass p-4 mb-4 space-y-3">
-        {options?.map((building) => {
+        {[...(options ?? [])]
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((building) => {
           const buildingDescendants: Key[] = building.areas.flatMap((area) => [
             key("area", area.id),
             ...area.spaces.map((s) => key("space", s.id)),
@@ -102,7 +104,9 @@ export function AdminAssignmentsPage() {
                 {building.name}
               </label>
               <div className="ml-6 mt-1 space-y-1">
-                {building.areas.map((area) => {
+                {[...building.areas]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((area) => {
                   const areaDescendants: Key[] = area.spaces.map((s) => key("space", s.id));
                   return (
                     <div key={area.id}>
@@ -116,7 +120,9 @@ export function AdminAssignmentsPage() {
                         {area.name}
                       </label>
                       <div className="ml-6 mt-1 space-y-1">
-                        {area.spaces.map((space) => (
+                        {[...area.spaces]
+                          .sort((a, b) => a.name.localeCompare(b.name))
+                          .map((space) => (
                           <label key={space.id} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                             <input
                               type="checkbox"

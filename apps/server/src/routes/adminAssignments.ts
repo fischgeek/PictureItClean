@@ -3,6 +3,7 @@ import { ResourceType } from "../domain/types";
 import { requireAuth } from "../middleware/auth";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { repos } from "../repositories";
+import { resolveAssignedSpaceIds } from "../services/stats";
 
 // Mounted at /api/admin -- a distinct prefix (not bare /api) so this router's blanket
 // requireAdmin can never intercept unrelated non-admin endpoints registered elsewhere.
@@ -55,6 +56,12 @@ adminAssignmentsRouter.put("/assignments/:userId", (req, res) => {
   }
 
   repos.assignments.replaceForUser(targetUser.id, items, req.user!.id);
+
+  // Spaces dropped from the pool must stop showing up immediately -- otherwise an
+  // already-issued daily_assignments row lingers on the dashboard forever, since nothing
+  // else ever revisits it once created.
+  const keepSpaceIds = resolveAssignedSpaceIds(targetUser.id);
+  repos.dailyAssignments.deleteActiveNotIn(targetUser.id, keepSpaceIds);
 
   // Assigning implies access: grant at-least-viewer membership on each assigned resource,
   // without ever downgrading an existing higher role (editor/owner).

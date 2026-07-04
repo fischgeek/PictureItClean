@@ -127,4 +127,8 @@ export interface DailyAssignmentRepository {
    * duplicate assignment for the same user/space/date already existed, in which case this
    * row was dropped instead of colliding with it. */
   reschedule(id: string, newDate: string): DailyAssignment | null;
+  /** Drops this user's active (not-yet-completed) rows for any space NOT in keepSpaceIds -- used
+   * when an admin edits a user's assignment pool, so spaces removed from the pool immediately stop
+   * showing up on that user's dashboard instead of lingering as already-issued picks. */
+  deleteActiveNotIn(userId: string, keepSpaceIds: string[]): void;
 }

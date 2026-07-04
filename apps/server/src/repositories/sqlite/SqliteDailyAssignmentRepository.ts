@@ -72,4 +72,15 @@ export class SqliteDailyAssignmentRepository implements DailyAssignmentRepositor
     }
     return this.findById(id)!;
   }
+
+  deleteActiveNotIn(userId: string, keepSpaceIds: string[]) {
+    if (keepSpaceIds.length === 0) {
+      db.prepare(`DELETE FROM daily_assignments WHERE user_id = ? AND completed_at IS NULL`).run(userId);
+      return;
+    }
+    const placeholders = keepSpaceIds.map(() => "?").join(",");
+    db.prepare(
+      `DELETE FROM daily_assignments WHERE user_id = ? AND completed_at IS NULL AND space_id NOT IN (${placeholders})`
+    ).run(userId, ...keepSpaceIds);
+  }
 }
